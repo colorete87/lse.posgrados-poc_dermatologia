@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DermaCasos · Prueba de concepto</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#fff; --text:#1f2933; --muted:#6b7280; --line:#e5e7eb;
+    --primary:#0f766e; --primary-dark:#115e59; --primary-soft:#ccfbf1;
+    --leve:#16a34a; --moderada:#d97706; --severa:#dc2626;
+    --leve-soft:#dcfce7; --moderada-soft:#fef3c7; --severa-soft:#fee2e2;
+    --alta:#16a34a; --media:#d97706; --baja:#dc2626;
+    --radius:10px; --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45}
+  header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+  .topbar{max-width:1100px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{font-weight:700;font-size:20px;color:var(--primary);display:flex;align-items:center;gap:8px;text-decoration:none;cursor:pointer}
+  .brand:hover{color:var(--primary-dark)}
+  nav{justify-content:flex-end}
+  .opciones{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .opcion{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;cursor:pointer;border:2px solid transparent;transition:.15s}
+  .opcion:hover{border-color:var(--primary);transform:translateY(-2px)}
+  .opcion .ic{font-size:34px}
+  .opcion h2{font-size:17px;margin:8px 0 4px}
+  .opcion p{margin:0;color:var(--muted);font-size:14px}
+  .home-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .volver{margin-bottom:14px}
+  .brand small{font-weight:400;color:var(--muted);font-size:12px;background:var(--primary-soft);padding:2px 8px;border-radius:99px}
+  nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+  nav button{background:none;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:15px;color:var(--muted);font-weight:500}
+  nav button:hover{background:var(--bg)}
+  nav button.active{background:var(--primary-soft);color:var(--primary-dark)}
+  .tools{display:flex;gap:6px}
+  main{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+  .view{display:none}.view.active{display:block}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:14px}
+  .grid-2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px}
+  input[type=text],input[type=date],input[type=number],select,textarea{
+    width:100%;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;font:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
+  textarea{min-height:110px;resize:vertical}
+  .field{position:relative}
+  .field.conf-baja input,.field.conf-baja select,.field.conf-baja textarea{border-color:var(--baja);background:#fff7f7}
+  .field.conf-media input,.field.conf-media select,.field.conf-media textarea{border-color:var(--media);background:#fffdf5}
+  .conf{position:absolute;right:0;top:0;font-size:11px;font-weight:600;padding:1px 7px;border-radius:99px;color:#fff}
+  .conf.alta{background:var(--alta)}.conf.media{background:var(--media)}.conf.baja{background:var(--baja)}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:1px solid transparent;cursor:pointer;font:inherit;font-weight:600;font-size:14px;background:var(--primary);color:#fff}
+  .btn:hover{background:var(--primary-dark)}
+  .btn.secondary{background:#fff;color:var(--text);border-color:#d1d5db}
+  .btn.secondary:hover{background:var(--bg)}
+  .btn.danger{background:#fff;color:var(--severa);border-color:#fca5a5}
+  .btn.danger:hover{background:var(--severa-soft)}
+  .btn.sm{padding:5px 10px;font-size:13px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+  .pills{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{padding:7px 14px;border-radius:99px;border:2px solid var(--line);background:#fff;cursor:pointer;font:inherit;font-weight:600;font-size:13px}
+  .pill.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c)}
+  .drop{border:2px dashed #cbd5e1;border-radius:var(--radius);padding:22px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s}
+  .drop:hover,.drop.over{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-dark)}
+  .drop input{display:none}
+  .thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .thumb{position:relative;width:96px;height:96px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#fff}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .x{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;line-height:1}
+  .docs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .doc{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:14px}
+  .doc span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .doc button{background:none;border:none;cursor:pointer;color:var(--muted)}
+  .badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+  .badge.sev{background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c)}
+  .badge.ocr{background:#ede9fe;color:#6d28d9}
+  .badge.manual{background:#e0f2fe;color:#0369a1}
+  .badge.bulk{background:#fce7f3;color:#be185d}
+  .badge.pendiente{background:#fef3c7;color:#b45309}
+  .badge.validado{background:#dcfce7;color:#15803d}
+  .alert-pend{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  table.bulk{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+  table.bulk th,table.bulk td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  table.bulk th{color:var(--muted);font-weight:600;font-size:12px}
+  table.bulk td.warn{color:var(--moderada)}
+  .levels{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .levels select{width:auto}
+  .levels .sep{color:var(--muted)}
+  code.path{background:var(--bg);padding:2px 6px;border-radius:5px;font-size:13px}
+  /* búsqueda */
+  .filters{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;align-items:end}
+  @media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
+  .results{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:18px}
+  .case{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column}
+  .case:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+  .case .img{height:140px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+  .case .img img{width:100%;height:100%;object-fit:cover}
+  .case .body{padding:12px 14px;flex:1}
+  .case .name{font-weight:700;font-size:16px}
+  .case .meta{color:var(--muted);font-size:13px;margin:2px 0 8px}
+  .case .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .count{color:var(--muted);margin-top:14px;font-size:14px}
+  .empty{text-align:center;color:var(--muted);padding:40px}
+  /* detalle */
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:14px;margin-top:14px}
+  .kv dt{color:var(--muted);font-weight:600}.kv dd{margin:0}
+  .gallery{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .gallery img{width:160px;height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:zoom-in}
+  .kw{display:inline-block;background:var(--bg);border:1px solid var(--line);padding:2px 9px;border-radius:99px;font-size:12px;margin:2px}
+  h3{font-size:15px;margin:22px 0 6px;color:#374151}
+  /* ocr */
+  .ocr-progress{margin-top:18px}
+  .bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--primary);transition:width .4s}
+  .ocr-steps{margin:10px 0 0;padding:0;list-style:none;color:var(--muted);font-size:14px}
+  .ocr-steps li{padding:3px 0}
+  .ocr-steps li.done{color:var(--primary-dark)}
+  .ocr-steps li.done::before{content:"✓ "}
+  .ocr-steps li.now::before{content:"⏳ "}
+  .notice{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:14px;margin-bottom:16px}
+  .legend{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .legend .conf{position:static}
+  /* evolución / histopatología */
+  .timeline{position:relative;margin-top:10px;padding-left:22px;border-left:2px solid var(--line)}
+  .visita{position:relative;margin-bottom:22px}
+  .visita::before{content:"";position:absolute;left:-29px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid #fff;box-shadow:0 0 0 2px var(--primary)}
+  .visita.histopatologia::before{background:#7e22ce;box-shadow:0 0 0 2px #7e22ce}
+  .visita.histopatologia .cuerpo{background:#fdf4ff;border:1px solid #e9d5ff;border-radius:var(--radius);padding:10px 14px;margin-top:6px}
+  .visita .tipo{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--primary-soft);color:var(--primary-dark)}
+  .visita.histopatologia .tipo{background:#f3e8ff;color:#7e22ce}
+  .visita .vh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .visita .vh strong{font-size:15px}
+  .visita .vh .n{color:var(--muted);font-size:13px}
+  .visita p{margin:6px 0 0;white-space:pre-wrap}
+  .visita .gallery img{width:120px;height:120px}
+  .badge.histo{background:#f3e8ff;color:#7e22ce}
+  .sec-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:22px}
+  .sec-head h3{margin:0}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;z-index:40;padding:30px 16px;overflow:auto}
+  .modal.on{display:flex}
+  .modal .card{width:100%;max-width:720px}
+  /* lightbox / toast */
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}
+  .lightbox.on{display:flex}.lightbox img{max-width:92vw;max-height:92vh;border-radius:8px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2933;color:#fff;padding:11px 18px;border-radius:8px;opacity:0;transition:.25s;z-index:60;font-size:14px;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%)}
+  /* configuración */
+  .cfg-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .cfg-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg);border-radius:8px}
+  .cfg-item input[type=text]{flex:1;padding:6px 9px}
+  .cfg-item .ico{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px 5px;border-radius:5px}
+  .cfg-item .ico:hover{background:#fff;color:var(--text)}
+  .cfg-item .ico:disabled{opacity:.3;cursor:default}
+  .cfg-item .uso{font-size:12px;color:var(--muted);white-space:nowrap}
+  .swatches{display:flex;gap:4px}
+  .sw{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+  .sw.on{border-color:#1f2933}
+  .cfg-add{display:flex;gap:8px;margin-top:10px}
+  .cfg-add input{flex:1}
+  .storage{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+  .storage i{display:block;height:100%;background:var(--primary)}
+  .brand .centro{font-weight:400;font-size:13px;color:var(--muted);margin-left:4px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+  footer button{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <a class="brand" href="#" onclick="go('buscar');return false" title="Inicio">🩺 DermaCasos <small>PoC</small><span class="centro" id="brand-centro"></span></a>
+    <nav>
+      <button data-view="nuevo">➕ Nuevo caso</button>
+      <button data-view="importar">📥 Importar caso</button>
+      <button data-view="config">⚙ Configuración</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ===== NUEVO / EDITAR ===== -->
+  <section id="view-nuevo" class="view">
+    <h1 id="form-title">Nuevo caso</h1>
+    <p class="sub" id="form-sub">Cargá los datos del paciente, las imágenes y la documentación.</p>
+    <div class="card">
+      <div id="ocr-notice" class="notice" style="display:none">
+        <strong>Revisión requerida.</strong> Los datos fueron extraídos automáticamente por OCR del documento. Verificá cada campo antes de validar.
+        <div class="legend" style="margin:8px 0 0"><span><span class="conf alta">alta</span> confianza alta</span><span><span class="conf media">media</span> revisar</span><span><span class="conf baja">baja</span> probablemente incorrecto</span></div>
+      </div>
+      <form id="form" onsubmit="guardar(event)">
+        <input type="hidden" id="f-id">
+        <div class="grid grid-2">
+          <div class="field" data-f="paciente"><label>Nombre y apellido del paciente *</label><input type="text" id="f-paciente" required></div>
+          <div class="field" data-f="dni"><label>DNI *</label><input type="text" id="f-dni" required pattern="[0-9.]{6,12}" title="Solo números"></div>
+          <div class="field" data-f="nacimiento"><label>Fecha de nacimiento</label><input type="date" id="f-nacimiento"></div>
+          <div class="field" data-f="fecha"><label>Fecha de primera consulta *</label><input type="date" id="f-fecha" required></div>
+          <div class="field" data-f="patologia"><label>Patología *</label>
+            <select id="f-patologia" required onchange="togglePatOtra()"></select>
+            <input type="text" id="f-patologia-otra" placeholder="Especificar patología" style="margin-top:6px;display:none">
+          </div>
+          <div class="field" data-f="severidad"><label>Severidad *</label>
+            <div class="pills" id="f-severidad"></div>
+          </div>
+        </div>
+        <div class="grid" style="margin-top:14px">
+          <div class="field" data-f="descripcion"><label>Descripción clínica (primera consulta)</label><textarea id="f-descripcion" placeholder="Localización, evolución, síntomas, tratamiento indicado…"></textarea></div>
+          <div class="field" data-f="keywords"><label>Palabras clave (separadas por coma)</label><input type="text" id="f-keywords" placeholder="ej: prurito, brazos, recurrente"></div>
+        </div>
+
+        <h3>Imágenes de la consulta</h3>
+        <label class="drop" id="drop-img">📷 Arrastrá fotos acá o hacé clic para seleccionar
+          <input type="file" accept="image/*" multiple onchange="addFiles(this.files,'img')"></label>
+        <div class="thumbs" id="thumbs"></div>
+
+        <h3>Documentos de la consulta (PDF)</h3>
+        <label class="drop" id="drop-doc">📎 Arrastrá la ficha / historia clínica / informes en PDF acá o hacé clic
+          <input type="file" accept="application/pdf" multiple onchange="addFiles(this.files,'doc')"></label>
+        <div class="docs" id="docs"></div>
+
+        <div class="actions">
+          <button type="button" class="btn secondary" onclick="go('buscar')">Cancelar</button>
+          <button type="button" class="btn secondary" id="btn-sinvalidar" style="display:none" onclick="guardar(null,'pendiente')">Guardar sin validar</button>
+          <button type="submit" class="btn" id="btn-guardar">Guardar caso</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== IMPORTAR (menú) ===== -->
+  <section id="view-importar" class="view">
+    <h1>Importar caso</h1>
+    <p class="sub">Casos que ya existen en papel o en archivos. Los datos se extraen con OCR y quedan pendientes de validación por un médico.</p>
+    <div class="opciones">
+      <div class="opcion" onclick="go('ocr')"><div class="ic">📄</div><h2>Importar un caso (OCR)</h2><p>Subís la ficha o historia clínica en PDF de un paciente. Se extraen los datos y los revisás en el momento, o los dejás pendientes.</p></div>
+      <div class="opcion" onclick="go('bulk')"><div class="ic">📁</div><h2>Carga masiva</h2><p>Seleccionás una carpeta con muchos casos ya organizados (por patología, paciente, etc.). Se importan todos como pendientes de validación.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== OCR ===== -->
+  <section id="view-ocr" class="view">
+    <button class="btn secondary sm volver" onclick="go('importar')">← Importar caso</button>
+    <h1>Importar un caso (OCR)</h1>
+    <p class="sub">Subí la ficha o historia clínica en PDF. El sistema extrae los datos con OCR y vos los validás antes de guardar.</p>
+    <div class="card">
+      <div id="ocr-upload">
+        <label class="drop" id="drop-ocr" style="padding:40px">📄 Arrastrá el PDF de la ficha acá o hacé clic para seleccionar
+          <input type="file" accept="application/pdf" onchange="iniciarOcr(this.files[0])"></label>
+        <p style="color:var(--muted);font-size:13px;margin-top:12px">⚠ Prueba de concepto: el OCR está <strong>simulado</strong>. Los datos extraídos son ficticios y sirven para demostrar el flujo de validación.</p>
+      </div>
+      <div id="ocr-running" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:28px">📄</span><div><strong id="ocr-filename"></strong><div style="color:var(--muted);font-size:13px" id="ocr-size"></div></div></div>
+        <div class="ocr-progress"><div class="bar"><i id="ocr-bar"></i></div>
+          <ul class="ocr-steps" id="ocr-steps">
+            <li>Cargando documento</li>
+            <li>Reconociendo texto (OCR)</li>
+            <li>Identificando campos: paciente, DNI, diagnóstico</li>
+            <li>Extrayendo descripción clínica</li>
+            <li>Calculando confianza por campo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CARGA MASIVA ===== -->
+  <section id="view-bulk" class="view">
+    <button class="btn secondary sm volver" onclick="go('importar')">← Importar caso</button>
+    <h1>Carga masiva</h1>
+    <p class="sub">Seleccioná una carpeta raíz con casos ya organizados. Cada carpeta hoja (con imágenes y/o PDFs) se importa como un caso <strong>pendiente de validación</strong>.</p>
+    <div class="card">
+      <div style="font-size:14px;margin-bottom:12px">Estructura esperada: <code class="path" id="bulk-estructura"></code> <button class="btn secondary sm" onclick="go('config')" style="margin-left:6px">Cambiar en configuración</button></div>
+      <label class="drop" id="drop-bulk" style="padding:36px">📁 Arrastrá la carpeta raíz acá o hacé clic para seleccionarla
+        <input type="file" webkitdirectory multiple onchange="bulkFiles(this.files)"></label>
+      <div id="bulk-preview" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;flex-wrap:wrap;gap:8px">
+          <div id="bulk-resumen" style="font-size:14px"></div>
+          <div style="display:flex;gap:8px"><button class="btn secondary sm" onclick="bulkReset()">Cancelar</button><button class="btn" id="bulk-go" onclick="bulkImportar()">Importar casos</button></div>
+        </div>
+        <div style="overflow-x:auto"><table class="bulk"><thead><tr><th>Carpeta</th><th>Paciente</th><th>DNI</th><th>Patología</th><th>Fecha</th><th>📷</th><th>📄</th><th>Avisos</th></tr></thead><tbody id="bulk-rows"></tbody></table></div>
+      </div>
+      <div id="bulk-running" style="display:none;margin-top:18px">
+        <div style="font-size:14px;margin-bottom:6px" id="bulk-status"></div>
+        <div class="bar"><i id="bulk-bar"></i></div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-top:12px">⚠ Prueba de concepto: el OCR de los PDFs está simulado. Los datos que no se deducen del nombre de las carpetas se completan con valores ficticios para demostrar el flujo de validación posterior.</p>
+    </div>
+  </section>
+
+  <!-- ===== BUSCAR ===== -->
+  <section id="view-buscar" class="view">
+    <div class="home-head"><div><h1>Casos</h1><p class="sub">Buscá por paciente, DNI, patología, severidad, fecha o palabra clave.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="ocrConf=null;resetForm();go('nuevo')">➕ Nuevo caso</button><button class="btn secondary" onclick="go('importar')">📥 Importar caso</button></div></div>
+    <div class="card">
+      <div class="filters">
+        <div><label>Búsqueda libre</label><input type="text" id="q" placeholder="Nombre, DNI, palabra clave, descripción…" oninput="buscar()"></div>
+        <div><label>Patología</label><select id="q-pat" onchange="buscar()"></select></div>
+        <div><label>Severidad</label><select id="q-sev" onchange="buscar()"></select></div>
+        <div><label>Origen</label><select id="q-origen" onchange="buscar()"><option value="">Todos</option><option value="manual">Carga manual</option><option value="ocr">Importado OCR</option><option value="bulk">Carga masiva</option></select></div>
+        <div><label>Validación</label><select id="q-val" onchange="buscar()"><option value="">Todas</option><option value="pendiente">Pendientes</option><option value="validado">Validadas</option></select></div>
+        <div><label>Última visita desde</label><input type="date" id="q-desde" onchange="buscar()"></div>
+        <div><label>Última visita hasta</label><input type="date" id="q-hasta" onchange="buscar()"></div>
+      </div>
+      <div style="margin-top:10px"><button class="btn secondary sm" onclick="limpiarFiltros()">Limpiar filtros</button></div>
+    </div>
+    <div class="alert-pend" id="alert-pend" style="display:none"></div>
+    <div class="count" id="count"></div>
+    <div class="results" id="results"></div>
+  </section>
+
+  <!-- ===== CONFIGURACIÓN ===== -->
+  <section id="view-config" class="view">
+    <h1>Configuración</h1>
+    <p class="sub">Los cambios se guardan automáticamente en este navegador y se incluyen al exportar el JSON.</p>
+    <div class="grid" style="gap:18px">
+      <div class="card">
+        <h3 style="margin-top:0">Datos del centro</h3>
+        <div class="grid grid-2">
+          <div><label>Centro / servicio</label><input type="text" id="c-centro" placeholder="ej: Servicio de Dermatología – Hospital X" onchange="cfgDatos()"></div>
+          <div><label>Profesional</label><input type="text" id="c-profesional" placeholder="ej: Dra. Pérez" onchange="cfgDatos()"></div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;margin:8px 0 0">El profesional queda registrado en cada caso nuevo que se cargue.</p>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h3 style="margin:0">Patologías</h3>
+          <button class="btn secondary sm" onclick="cfgReset('patologias')">Restaurar lista por defecto</button></div>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 0">Aparecen en el desplegable al cargar un caso y en el filtro del buscador. Siempre queda disponible la opción "Otra…".</p>
+        <div class="cfg-list" id="c-patologias"></div>
+        <div class="cfg-add"><input type="text" id="c-pat-nueva" placeholder="Nueva patología" onkeydown="if(event.key==='Enter'){event.preventDefault();cfgAdd('patologias')}"><button class="btn sm" onclick="cfgAdd('patologias')">Agregar</button></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h3 style="margin:0">Niveles de severidad</h3>
+          <button class="btn secondary sm" onclick="cfgReset('severidades')">Restaurar por defecto</button></div>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 0">Ordenados de menor a mayor gravedad. El color se usa en las etiquetas.</p>
+        <div class="cfg-list" id="c-severidades"></div>
+        <div class="cfg-add"><input type="text" id="c-sev-nueva" placeholder="Nuevo nivel" onkeydown="if(event.key==='Enter'){event.preventDefault();cfgAdd('severidades')}"><button class="btn sm" onclick="cfgAdd('severidades')">Agregar</button></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Carga masiva · estructura de carpetas</h3>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 10px">Indicá qué representa cada nivel de carpeta a partir de la raíz. La última carpeta con archivos es el caso.</p>
+        <div class="levels" id="c-niveles"></div>
+        <div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="c-dni-en-carpeta" onchange="cfgBulk()"> La carpeta de paciente incluye el DNI al final (ej: <code class="path">Gonzalez Maria - 28453120</code>)</label></div>
+        <div style="margin-top:10px;font-size:13px;color:var(--muted)">Ejemplo resultante: <code class="path" id="c-ejemplo"></code></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Respaldo · exportar / importar</h3>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 12px">El archivo JSON incluye todos los casos (con imágenes y documentos) y esta configuración. Sirve para hacer copias de seguridad o pasar los datos a otro navegador o equipo. Al importar, los casos con el mismo id se actualizan y el resto se agrega.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="exportar()">⬇ Exportar JSON</button><label class="btn secondary" style="cursor:pointer">⬆ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importar(this)"></label></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Almacenamiento</h3>
+        <div id="c-storage-txt" style="font-size:14px"></div>
+        <div class="storage"><i id="c-storage-bar"></i></div>
+        <p style="color:var(--muted);font-size:13px">Los datos viven en el localStorage de este navegador (límite aproximado de 5 MB). Exportá a JSON periódicamente como respaldo.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger sm" onclick="vaciarTodo()">🗑 Eliminar todos los casos</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DETALLE ===== -->
+  <section id="view-detalle" class="view">
+    <button class="btn secondary sm" onclick="go('buscar')">← Volver al buscador</button>
+    <div class="card" style="margin-top:14px" id="detalle"></div>
+  </section>
+</main>
+
+<footer>DermaCasos · prueba de concepto · datos guardados localmente en este navegador ·
+  <button onclick="restaurarEjemplos()">restaurar datos de ejemplo</button></footer>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <h2 id="m-title" style="margin:0 0 4px;font-size:19px"></h2>
+    <p class="sub" id="m-sub"></p>
+    <form id="m-form" onsubmit="modalGuardar(event)">
+      <div class="grid grid-2">
+        <div><label id="m-fecha-label">Fecha *</label><input type="date" id="m-fecha" required></div>
+        <div id="m-prof-wrap"><label>Profesional</label><input type="text" id="m-prof"></div>
+      </div>
+      <div style="margin-top:14px"><label id="m-desc-label">Descripción</label><textarea id="m-desc"></textarea></div>
+      <h3 id="m-img-label">Imágenes</h3>
+      <label class="drop" id="m-drop-img">📷 Arrastrá fotos acá o hacé clic<input type="file" accept="image/*" multiple onchange="mAdd(this.files,'img')"></label>
+      <div class="thumbs" id="m-thumbs"></div>
+      <h3 id="m-doc-label">Documentos (PDF)</h3>
+      <label class="drop" id="m-drop-doc">📎 Arrastrá PDFs acá o hacé clic<input type="file" accept="application/pdf" multiple onchange="mAdd(this.files,'doc')"></label>
+      <div class="docs" id="m-docs"></div>
+      <div class="actions"><button type="button" class="btn secondary" onclick="cerrarModal()">Cancelar</button><button type="submit" class="btn" id="m-ok">Guardar</button></div>
+    </form>
+  </div>
+</div>
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('on')"><img id="lightbox-img"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Datos ----------
+const KEY='dermacasos.v1';
+const CFG_KEY='dermacasos.config.v1';
+const COLORES=['#16a34a','#d97706','#dc2626','#7c3aed','#0369a1','#6b7280'];
+const CFG_DEFAULT=()=>({
+  patologias:['Psoriasis','Dermatitis atópica','Dermatitis de contacto','Acné','Rosácea','Urticaria','Vitiligo','Melanoma','Carcinoma basocelular','Carcinoma espinocelular','Queratosis actínica','Nevo melanocítico','Alopecia areata','Micosis cutánea','Herpes zóster','Lupus cutáneo'],
+  severidades:[{nombre:'Leve',color:'#16a34a'},{nombre:'Moderada',color:'#d97706'},{nombre:'Severa',color:'#dc2626'}],
+  centro:'',profesional:'',
+  bulk:{niveles:['patologia','paciente'],dniEnCarpeta:true}});
+const NIVELES={paciente:'Paciente',patologia:'Patología',fecha:'Fecha (AAAA-MM-DD)',ignorar:'Ignorar'};
+let cfg=CFG_DEFAULT();
+function loadCfg(){ try{ const c=JSON.parse(localStorage.getItem(CFG_KEY)); if(c) cfg=Object.assign(CFG_DEFAULT(),c) }catch(e){} if(!cfg.bulk) cfg.bulk=CFG_DEFAULT().bulk }
+function saveCfg(){ try{ localStorage.setItem(CFG_KEY,JSON.stringify(cfg)) }catch(e){} applyCfg() }
+const sevColor=n=>(cfg.severidades.find(x=>x.nombre===n)||{}).color||'#6b7280';
+const sevBadge=n=>`<span class="badge sev" style="--c:${sevColor(n)}">${esc(n)}</span>`;
+function applyCfg(){
+  document.getElementById('brand-centro').textContent=cfg.centro?'· '+cfg.centro:'';
+  document.getElementById('f-severidad').innerHTML=cfg.severidades.map(x=>`<button type="button" class="pill" data-v="${esc(x.nombre)}" style="--c:${x.color}" onclick="setSev(this.dataset.v)">${esc(x.nombre)}</button>`).join('');
+  const qs=document.getElementById('q-sev'), cur=qs.value; qs.innerHTML='<option value="">Todas</option>'+cfg.severidades.map(x=>`<option>${esc(x.nombre)}</option>`).join(''); qs.value=cur;
+  fillSelects();
+}
+// ---- vista de configuración ----
+function renderCfg(){
+  document.getElementById('c-centro').value=cfg.centro; document.getElementById('c-profesional').value=cfg.profesional;
+  const usoPat=n=>casos.filter(c=>c.patologia===n).length, usoSev=n=>casos.filter(c=>c.severidad===n).length;
+  const item=(tipo,i,nombre,uso,extra)=>`<div class="cfg-item">
+      <button class="ico" title="Subir" onclick="cfgMove('${tipo}',${i},-1)" ${i===0?'disabled':''}>▲</button><button class="ico" title="Bajar" onclick="cfgMove('${tipo}',${i},1)" ${i===cfg[tipo].length-1?'disabled':''}>▼</button>
+      <input type="text" value="${esc(nombre)}" onchange="cfgRename('${tipo}',${i},this.value)">${extra||''}
+      <span class="uso">${uso?uso+' caso'+(uso>1?'s':''):'sin uso'}</span>
+      <button class="ico" title="Eliminar" onclick="cfgRemove('${tipo}',${i})">✕</button></div>`;
+  document.getElementById('c-patologias').innerHTML=cfg.patologias.map((n,i)=>item('patologias',i,n,usoPat(n))).join('')||'<em style="color:var(--muted)">Sin patologías definidas</em>';
+  document.getElementById('c-severidades').innerHTML=cfg.severidades.map((x,i)=>item('severidades',i,x.nombre,usoSev(x.nombre),
+    `<div class="swatches">${COLORES.map(c=>`<span class="sw ${c===x.color?'on':''}" style="background:${c}" onclick="cfgColor(${i},'${c}')"></span>`).join('')}</div>`)).join('')||'<em style="color:var(--muted)">Sin niveles definidos</em>';
+  renderCfgBulk();
+  const bytes=(localStorage.getItem(KEY)||'').length+(localStorage.getItem(CFG_KEY)||'').length, mb=bytes/1048576, pct=Math.min(100,mb/5*100);
+  document.getElementById('c-storage-txt').innerHTML=`<strong>${casos.length}</strong> casos · <strong>${mb.toFixed(2)} MB</strong> de ~5 MB usados (${pct.toFixed(0)} %)`;
+  document.getElementById('c-storage-bar').style.width=pct+'%'; document.getElementById('c-storage-bar').style.background=pct>80?'var(--severa)':'var(--primary)';
+}
+const cfgNombre=(tipo,i)=>tipo==='severidades'?cfg[tipo][i].nombre:cfg[tipo][i];
+function cfgDatos(){ cfg.centro=document.getElementById('c-centro').value.trim(); cfg.profesional=document.getElementById('c-profesional').value.trim(); saveCfg(); toast('Datos guardados') }
+function cfgAdd(tipo){ const inp=document.getElementById(tipo==='patologias'?'c-pat-nueva':'c-sev-nueva'); const n=inp.value.trim(); if(!n) return;
+  if(cfg[tipo].some((x,i)=>cfgNombre(tipo,i).toLowerCase()===n.toLowerCase())){ alert('Ya existe un elemento con ese nombre.'); return }
+  cfg[tipo].push(tipo==='severidades'?{nombre:n,color:COLORES[cfg.severidades.length%COLORES.length]}:n); inp.value=''; saveCfg(); renderCfg() }
+function cfgRename(tipo,i,v){ v=v.trim(); if(!v){ renderCfg(); return } const old=cfgNombre(tipo,i);
+  if(tipo==='severidades') cfg[tipo][i].nombre=v; else cfg[tipo][i]=v;
+  const campo=tipo==='severidades'?'severidad':'patologia'; const afect=casos.filter(c=>c[campo]===old);
+  if(afect.length&&confirm(`Hay ${afect.length} caso(s) con "${old}". ¿Actualizarlos a "${v}"?`)){ afect.forEach(c=>c[campo]=v); save() }
+  saveCfg(); renderCfg() }
+function cfgRemove(tipo,i){ const n=cfgNombre(tipo,i); const campo=tipo==='severidades'?'severidad':'patologia'; const uso=casos.filter(c=>c[campo]===n).length;
+  if(!confirm(`¿Eliminar "${n}" de la lista?`+(uso?`\n\n${uso} caso(s) la tienen asignada: conservan el valor, pero dejará de aparecer como opción.`:''))) return;
+  cfg[tipo].splice(i,1); saveCfg(); renderCfg() }
+function cfgMove(tipo,i,d){ const a=cfg[tipo]; const j=i+d; if(j<0||j>=a.length) return; [a[i],a[j]]=[a[j],a[i]]; saveCfg(); renderCfg() }
+function cfgColor(i,c){ cfg.severidades[i].color=c; saveCfg(); renderCfg() }
+function cfgReset(tipo){ if(!confirm('¿Restaurar la lista por defecto? Se perderán los cambios en esta lista.')) return; cfg[tipo]=CFG_DEFAULT()[tipo]; saveCfg(); renderCfg() }
+function renderCfgBulk(){
+  const n=cfg.bulk.niveles;
+  document.getElementById('c-niveles').innerHTML=n.map((v,i)=>`${i?'<span class="sep">/</span>':''}<select onchange="cfgNivel(${i},this.value)">${Object.entries(NIVELES).map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('')}</select>`).join('')
+    +(n.length<3?`<button class="btn secondary sm" onclick="cfgNivel(${n.length},'paciente')">+ nivel</button>`:'')+(n.length>1?`<button class="btn secondary sm" onclick="cfgNivel(${n.length-1},null)">− quitar último</button>`:'');
+  document.getElementById('c-dni-en-carpeta').checked=!!cfg.bulk.dniEnCarpeta;
+  document.getElementById('c-ejemplo').textContent=bulkEjemplo();
+}
+function bulkEjemplo(){ const ej={paciente:cfg.bulk.dniEnCarpeta?'Gonzalez Maria - 28453120':'Gonzalez Maria',patologia:'Psoriasis',fecha:'2026-08-14',ignorar:'(cualquier nombre)'};
+  return 'raíz/'+cfg.bulk.niveles.map(k=>ej[k]).join('/')+'/{fotos, ficha.pdf}' }
+function cfgNivel(i,v){ if(v===null) cfg.bulk.niveles.splice(i,1); else cfg.bulk.niveles[i]=v; saveCfg(); renderCfgBulk() }
+function cfgBulk(){ cfg.bulk.dniEnCarpeta=document.getElementById('c-dni-en-carpeta').checked; saveCfg(); renderCfgBulk() }
+function vaciarTodo(){ if(!confirm(`¿Eliminar los ${casos.length} casos guardados? Esta acción no se puede deshacer. Se recomienda exportar antes.`)) return; casos=[]; save(); fillSelects(); renderCfg(); toast('Casos eliminados') }
+let casos=[];
+let archivos={img:[],doc:[]};  // buffers del formulario
+let ocrConf=null;              // confianza por campo cuando el form viene del OCR (modo validación)
+let ocrDoc=null;
+
+// Migración: la fecha/descripción/imágenes del caso pasan a ser la primera visita
+function normalizar(c){
+  if(!c.validacion) c.validacion=(c.origen==='ocr'&&c.validadoOcr===false)?'pendiente':'validado';
+  if(!Array.isArray(c.visitas)||!c.visitas.length){ c.visitas=[{id:uid(),fecha:c.fecha||'',descripcion:c.descripcion||'',imagenes:c.imagenes||[],documentos:[],profesional:c.registradoPor||''}] }
+  delete c.fecha; delete c.descripcion; delete c.imagenes;
+  c.visitas.forEach(v=>{ v.tipo=v.tipo||'visita'; v.imagenes=v.imagenes||[]; v.documentos=v.documentos||[] });
+  // documentos a nivel caso → visita inicial; histopatología separada → entrada de la línea de tiempo
+  if(Array.isArray(c.documentos)){ c.visitas[0].documentos.push(...c.documentos); delete c.documentos }
+  if(c.histopatologia){ const h=c.histopatologia; c.visitas.push({id:uid(),tipo:'histopatologia',fecha:h.fecha||'',descripcion:h.descripcion||'',profesional:h.profesional||'',imagenes:h.imagenes||[],documentos:h.informes||[]}) }
+  delete c.histopatologia;
+  return c;
+}
+const visitasOrd=c=>[...c.visitas].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+const soloVisitas=c=>c.visitas.filter(v=>v.tipo!=='histopatologia');
+const tieneHisto=c=>c.visitas.some(v=>v.tipo==='histopatologia');
+const ultimaFecha=c=>c.visitas.reduce((m,v)=>v.fecha>m?v.fecha:m,'');
+const primeraFecha=c=>c.visitas.reduce((m,v)=>v.fecha&&(!m||v.fecha<m)?v.fecha:m,'');
+const todasImg=c=>c.visitas.flatMap(v=>v.imagenes||[]);
+const todosDocs=c=>c.visitas.flatMap(v=>v.documentos||[]);
+function load(){ try{ casos=JSON.parse(localStorage.getItem(KEY))||[] }catch(e){ casos=[] }
+  casos.forEach(normalizar);
+  if(!casos.length){ casos=ejemplos(); save(true) } }
+function save(silent){
+  try{ localStorage.setItem(KEY,JSON.stringify(casos)); return true }
+  catch(e){ if(!silent) alert('No se pudo guardar: se superó el límite de almacenamiento del navegador (~5 MB). Exportá los casos a JSON o eliminá imágenes pesadas.'); return false }
+}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const hoy=()=>new Date().toISOString().slice(0,10);
+const fmt=d=>d?d.split('-').reverse().join('/'):'—';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// Imágenes sintéticas por patología (para los ejemplos): piel con textura + lesiones características
+function lesionSvg(pat,seed,zoom){
+  let r=seed*9301+49297; const rnd=()=>{ r=(r*9301+49297)%233280; return r/233280 };
+  const R=(a,b)=>a+rnd()*(b-a);
+  const skins=['#e8b89a','#d9a07f','#c98c6b','#f0c9ad','#b8785a']; const skin=skins[seed%skins.length];
+  const W=400,H=300,sc=zoom?1.8:1; let g='';
+  const blob=(cx,cy,rx,ry,fill,op,jit=0.25,n=9,extra='')=>{ const pts=[];
+    for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, k=1+R(-jit,jit); pts.push([cx+Math.cos(a)*rx*k, cy+Math.sin(a)*ry*k]) }
+    // curva suave: bezier cuadráticas usando los puntos medios como anclas
+    const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2]; let m0=mid(pts[n-1],pts[0]); let d=`M${m0[0].toFixed(1)} ${m0[1].toFixed(1)} `;
+    for(let i=0;i<n;i++){ const m=mid(pts[i],pts[(i+1)%n]); d+=`Q${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)} ` }
+    return `<path d="${d}Z" fill="${fill}" opacity="${op}" ${extra}/>` };
+  switch(pat){
+    case 'Psoriasis': for(let i=0;i<(zoom?2:4);i++){ const cx=R(80,320),cy=R(70,230),rx=R(40,75)*sc,ry=R(30,55)*sc;
+      g+=blob(cx,cy,rx,ry,'#c9463a',.85,.2); g+=blob(cx,cy,rx*.8,ry*.8,'#e06a5a',.7,.3);
+      for(let j=0;j<40;j++){ const a=rnd()*6.28,d=rnd(); g+=`<ellipse cx="${(cx+Math.cos(a)*rx*.75*d).toFixed(1)}" cy="${(cy+Math.sin(a)*ry*.75*d).toFixed(1)}" rx="${R(2,6)}" ry="${R(1.5,4)}" fill="#f5e9dc" opacity="${R(.5,.9)}"/>` } } break;
+    case 'Dermatitis atópica': case 'Dermatitis de contacto': for(let i=0;i<5;i++){ g+=blob(R(60,340),R(50,250),R(50,110)*sc,R(35,70)*sc,'#d97a6a',R(.3,.55),.35,12) }
+      for(let j=0;j<60;j++) g+=`<circle cx="${R(20,380)}" cy="${R(20,280)}" r="${R(1.5,3.5)}" fill="#b8503f" opacity="${R(.3,.7)}"/>`;
+      for(let j=0;j<6;j++){ const x=R(40,340),y=R(40,260); g+=`<path d="M${x} ${y} l${R(20,60)} ${R(-15,15)}" stroke="#a53f30" stroke-width="1.5" opacity=".5" fill="none"/>` } break;
+    case 'Acné': for(let j=0;j<(zoom?18:45);j++){ const x=R(20,380),y=R(20,280),rr=R(5,11)*sc; g+=`<circle cx="${x}" cy="${y}" r="${rr}" fill="#d6564a" opacity="${R(.5,.85)}"/>`; if(rnd()>.4) g+=`<circle cx="${x}" cy="${y}" r="${rr*.35}" fill="#f7efd8" opacity=".9"/>` }
+      for(let j=0;j<40;j++) g+=`<circle cx="${R(20,380)}" cy="${R(20,280)}" r="${R(1,2.5)}" fill="#5a3a2a" opacity=".5"/>`; break;
+    case 'Melanoma': case 'Nevo melanocítico': { const cx=200,cy=150,rx=(pat==='Melanoma'?70:40)*sc,ry=(pat==='Melanoma'?55:38)*sc, jit=pat==='Melanoma'?.45:.12;
+      g+=blob(cx,cy,rx,ry,'#3a2418',.95,jit,14); g+=blob(cx+R(-15,15),cy+R(-10,10),rx*.7,ry*.7,'#6b3a22',.8,jit,11); g+=blob(cx+R(-20,20),cy+R(-15,15),rx*.4,ry*.4,'#1a0f0a',.9,jit,9);
+      if(pat==='Melanoma'){ g+=blob(cx+R(-25,25),cy+R(-20,20),rx*.35,ry*.3,'#8a5a8a',.5,.4,8); g+=blob(cx+R(-30,30),cy+R(-20,20),rx*.3,ry*.3,'#c96a5a',.5,.4,8) }
+      g+=`<line x1="30" y1="270" x2="130" y2="270" stroke="#222" stroke-width="2"/><text x="80" y="288" font-family="sans-serif" font-size="11" fill="#222" text-anchor="middle">${zoom?'5 mm':'10 mm'}</text>`; break }
+    case 'Vitiligo': for(let i=0;i<4;i++){ g+=blob(R(60,340),R(50,250),R(50,100)*sc,R(35,70)*sc,'#fbeee3',.95,.35,13) } break;
+    case 'Carcinoma basocelular': case 'Carcinoma espinocelular': { const cx=200,cy=150,rr=(zoom?60:35);
+      g+=`<radialGradient id="g${seed}" cx="45%" cy="40%"><stop offset="0" stop-color="#f6d3c8"/><stop offset=".7" stop-color="#e8a898"/><stop offset="1" stop-color="#c9756a"/></radialGradient>`;
+      g+=`<ellipse cx="${cx}" cy="${cy}" rx="${rr}" ry="${rr*.85}" fill="url(#g${seed})"/>`;
+      for(let j=0;j<10;j++){ const a=rnd()*6.28; g+=`<path d="M${cx+Math.cos(a)*rr*.3} ${cy+Math.sin(a)*rr*.3} q${R(-10,10)} ${R(-10,10)} ${Math.cos(a)*rr*.6} ${Math.sin(a)*rr*.5}" stroke="#c0392b" stroke-width="1.2" fill="none" opacity=".8"/>` }
+      if(pat==='Carcinoma espinocelular') for(let j=0;j<25;j++) g+=`<circle cx="${cx+R(-rr*.6,rr*.6)}" cy="${cy+R(-rr*.5,rr*.5)}" r="${R(1,3)}" fill="#f4e4c4" opacity=".8"/>`;
+      g+=`<ellipse cx="${cx-rr*.3}" cy="${cy-rr*.35}" rx="${rr*.25}" ry="${rr*.15}" fill="#fff" opacity=".35"/>`; break }
+    case 'Rosácea': g+=blob(200,150,170,120,'#e28a7a',.45,.15,14); g+=blob(200,150,110,80,'#d9705f',.35,.2,12);
+      for(let j=0;j<25;j++){ const x=R(60,340),y=R(60,240); g+=`<path d="M${x} ${y} q${R(-8,8)} ${R(-8,8)} ${R(-20,20)} ${R(-15,15)}" stroke="#b03a2e" stroke-width="1" fill="none" opacity=".6"/>` }
+      for(let j=0;j<12;j++) g+=`<circle cx="${R(60,340)}" cy="${R(60,240)}" r="${R(3,6)}" fill="#c9463a" opacity=".7"/>`; break;
+    case 'Urticaria': for(let i=0;i<(zoom?3:7);i++){ const cx=R(50,350),cy=R(40,260),rx=R(30,70)*sc,ry=R(20,45)*sc;
+      g+=blob(cx,cy,rx*1.25,ry*1.25,'#e0705f',.5,.25,12); g+=blob(cx,cy,rx,ry,'#f3d2c0',.95,.2,12) } break;
+    case 'Queratosis actínica': for(let j=0;j<(zoom?6:14);j++){ const cx=R(30,370),cy=R(30,270); g+=blob(cx,cy,R(8,18)*sc,R(6,14)*sc,'#d9806a',.7,.35,9);
+      for(let k=0;k<8;k++) g+=`<circle cx="${cx+R(-10,10)}" cy="${cy+R(-8,8)}" r="${R(1,2.5)}" fill="#f2dcc0" opacity=".9"/>` } break;
+    default: for(let i=0;i<3;i++) g+=blob(R(80,320),R(60,240),R(40,80),R(30,60),'#d9705f',.6,.3);
+  }
+  const s=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+    <defs><filter id="t${seed}"><feTurbulence type="fractalNoise" baseFrequency="${zoom?'.35':'.6'}" numOctaves="3" seed="${seed}"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .12 0"/></filter>
+    <radialGradient id="v${seed}"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></radialGradient></defs>
+    <rect width="${W}" height="${H}" fill="${skin}"/>${g}<rect width="${W}" height="${H}" filter="url(#t${seed})"/><rect width="${W}" height="${H}" fill="url(#v${seed})"/>
+    <text x="392" y="292" font-family="sans-serif" font-size="10" fill="rgba(255,255,255,.7)" text-anchor="end">imagen sintética · demo</text></svg>`;
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(s)));
+}
+// Imagen sintética tipo microscopía H&E
+function histoSvg(seed,aum){
+  let r=seed*7919+13; const rnd=()=>{ r=(r*9301+49297)%233280; return r/233280 }; const R=(a,b)=>a+rnd()*(b-a);
+  let g=''; for(let i=0;i<220;i++){ const x=R(0,400),y=R(0,300); g+=`<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${R(3,7).toFixed(1)}" ry="${R(2.5,5).toFixed(1)}" fill="#5b2c83" opacity="${R(.55,.9).toFixed(2)}" transform="rotate(${R(0,180).toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)})"/>` }
+  for(let i=0;i<5;i++){ g+=`<path d="M${R(-50,100)} ${R(0,300)} q${R(50,150)} ${R(-80,80)} ${R(200,350)} ${R(-40,40)}" stroke="#f3a6b8" stroke-width="${R(14,30)}" fill="none" opacity=".5"/>` }
+  const s=`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><filter id="h${seed}"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="${seed}"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .08 0"/></filter></defs>
+    <rect width="400" height="300" fill="#f7c6d3"/><rect width="400" height="300" fill="#f0a9bf" opacity=".5"/>${g}<rect width="400" height="300" filter="url(#h${seed})"/>
+    <text x="8" y="290" font-family="sans-serif" font-size="11" fill="#333">H&amp;E · ${aum}</text><text x="392" y="292" font-family="sans-serif" font-size="10" fill="rgba(0,0,0,.5)" text-anchor="end">imagen sintética · demo</text></svg>`;
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(s)));
+}
+function ejemplos(){
+  const E=[
+    ['María González','28453120','1985-03-12','Psoriasis','Moderada','2026-08-14','Placas eritemato-descamativas en codos y rodillas, evolución de 6 meses. Prurito moderado. Se indica calcipotriol tópico.','placas, codos, rodillas, prurito','#e8b4a0'],
+    ['Juan Pérez','31220987','1990-07-25','Dermatitis atópica','Leve','2026-09-02','Eccema en pliegues antecubitales. Antecedentes de asma. Hidratación intensiva y corticoide de baja potencia.','eccema, pliegues, asma','#d9a58b'],
+    ['Lucía Fernández','40112334','1998-11-03','Acné','Severa','2026-07-30','Acné noduloquístico en rostro y espalda. Cicatrices en formación. Se inicia isotretinoína oral previa analítica.','noduloquístico, rostro, isotretinoína','#c98f7a'],
+    ['Carlos Rodríguez','22876541','1972-01-19','Melanoma','Severa','2026-06-21','Lesión pigmentada asimétrica de 9 mm en dorso, bordes irregulares, cambios recientes. Dermatoscopía sospechosa. Biopsia excisional.','lesión pigmentada, dorso, biopsia, dermatoscopía','#7a5a4a'],
+    ['Ana Martínez','35678902','1993-05-08','Vitiligo','Leve','2026-08-28','Máculas acrómicas en dorso de manos y periorales. Estable. Fotoprotección y tacrolimus tópico.','máculas, manos, acromía','#f1d3c2'],
+    ['Roberto Sánchez','18334567','1965-09-30','Carcinoma basocelular','Moderada','2026-05-11','Pápula perlada con telangiectasias en ala nasal, 6 mm. Confirmado por biopsia. Programar cirugía de Mohs.','pápula perlada, nariz, telangiectasias, Mohs','#d8a08a'],
+    ['Sofía López','42998112','2001-02-14','Rosácea','Leve','2026-09-08','Eritema centrofacial persistente con pápulas. Desencadenantes: sol y alcohol. Metronidazol tópico.','eritema, facial, pápulas','#e9a79a'],
+    ['Diego Ramírez','27665433','1980-12-01','Urticaria','Moderada','2026-08-05','Habones generalizados de 3 semanas de evolución, sin angioedema. Antihistamínicos a dosis doble.','habones, generalizada, antihistamínicos','#f0c0b0'],
+  ];
+  const PDF0='data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBSL01lZGlhQm94WzAgMCAzMDAgMTAwXT4+CmVuZG9iagp4cmVmCjAgNAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA2MCAwMDAwMCBuIAowMDAwMDAwMTE3IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTgwCiUlRU9GCg==';
+  const EVOL={0:[['2026-09-01','Control a 3 semanas: placas más delgadas, menor descamación en codos. Persiste prurito leve. Se mantiene calcipotriol.',2],['2026-09-12','Control: mejoría franca, placas residuales hipopigmentadas. Se espacia el tratamiento.',1]],
+    2:[['2026-08-27','Control a 4 semanas de isotretinoína: menos lesiones activas, queilitis como efecto adverso. Analítica normal.',2]],
+    3:[['2026-07-05','Resultado de biopsia: melanoma extensivo superficial, Breslow 0,8 mm. Se programa ampliación de márgenes.',1],['2026-08-02','Postoperatorio de ampliación: cicatriz en buen estado. Se indica control cada 3 meses y fotoprotección estricta.',1]],
+    5:[['2026-06-15','Postoperatorio cirugía de Mohs: herida en buen estado, sin signos de infección. Retiro de puntos.',1]]};
+  const HISTO={3:{fecha:'2026-06-28',descripcion:'Proliferación melanocítica atípica con patrón pagetoide en epidermis e invasión dérmica superficial. Breslow 0,8 mm, Clark III. Sin ulceración. Índice mitótico 1/mm². Márgenes laterales libres.',
+      imagenes:[{nombre:'HE_4x.jpg',data:histoSvg(3,'4x')},{nombre:'HE_20x.jpg',data:histoSvg(13,'20x')}],documentos:[{nombre:'informe_anatomopatologico_22876541.pdf',data:'data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBSL01lZGlhQm94WzAgMCAzMDAgMTAwXT4+CmVuZG9iagp4cmVmCjAgNAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA2MCAwMDAwMCBuIAowMDAwMDAwMTE3IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTgwCiUlRU9GCg=='}]},
+    5:{fecha:'2026-05-20',descripcion:'Nidos de células basaloides con empalizada periférica y retracción estromal, en continuidad con la epidermis. Compatible con carcinoma basocelular nodular. Márgenes comprometidos en profundidad.',
+      imagenes:[{nombre:'HE_10x.jpg',data:histoSvg(5,'10x')}],documentos:[]}};
+  return E.map((e,i)=>({id:'ej'+i,paciente:e[0],dni:e[1],nacimiento:e[2],patologia:e[3],severidad:e[4],
+    visitas:[{id:'ej'+i+'v0',tipo:'visita',fecha:e[5],descripcion:e[6],profesional:'Dr. Demo',imagenes:[{nombre:'foto_panoramica.jpg',data:lesionSvg(e[3],i+1,false)},{nombre:'foto_detalle.jpg',data:lesionSvg(e[3],i+11,true)}],
+        documentos:i%3==0?[{nombre:'ficha_'+e[1]+'.pdf',data:PDF0}]:[]},
+      ...(EVOL[i]||[]).map((v,k)=>({id:'ej'+i+'v'+(k+1),tipo:'visita',fecha:v[0],descripcion:v[1],profesional:'Dr. Demo',imagenes:Array.from({length:v[2]},(_,j)=>({nombre:`control_${k+1}_${j+1}.jpg`,data:lesionSvg(e[3],100+i*10+k*3+j,j>0)})),documentos:[]})),
+      ...(HISTO[i]?[Object.assign({id:'ej'+i+'h',tipo:'histopatologia',profesional:'Servicio de Anatomía Patológica'},HISTO[i])]:[])],
+    keywords:e[7].split(',').map(s=>s.trim()),
+    origen:i%3==0?'ocr':'manual',validacion:'validado',validadoPor:i%3==0?'Dr. Demo':undefined,validadoEn:i%3==0?e[5]+'T11:00:00':undefined,
+    creadoEn:e[5]+'T10:00:00'})).concat(ejemplosPendientes()).map(normalizar);
+}
+// Casos pendientes de validación: simulan una carga masiva y un OCR con errores típicos de reconocimiento
+function ejemplosPendientes(){
+  const PDF='data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBSL01lZGlhQm94WzAgMCAzMDAgMTAwXT4+CmVuZG9iagp4cmVmCjAgNAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA2MCAwMDAwMCBuIAowMDAwMDAwMTE3IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTgwCiUlRU9GCg==';
+  const img=(pat,seed,n)=>Array.from({length:n},(_,k)=>({nombre:`IMG_${seed}${k}.jpg`,data:lesionSvg(pat,seed+k*10,k>0)}));
+  const P=[
+    // carga masiva con PDF: casi todo con buena confianza, fecha de nacimiento dudosa
+    {paciente:'Gómez Patricia',dni:'24567890',nacimiento:'1974-06-03',patologia:'Psoriasis',severidad:'Moderada',fecha:'2026-03-02',
+     descripcion:'Placas en cuero cabelludo y región retroauricular. Descamación abundante. Tratamiento previo con corticoides tópicos sin respuesta sostenida.',
+     keywords:['cuero cabelludo','retroauricular','descamación'],imagenes:img('Psoriasis',21,3),documentos:[{nombre:'ficha_24567890.pdf',data:PDF}],
+     origen:'bulk',carpetaOrigen:'Psoriasis/Gomez Patricia - 24567890',
+     ocrConf:{paciente:'alta',dni:'alta',nacimiento:'media',fecha:'alta',patologia:'alta',severidad:'media',descripcion:'alta',keywords:'baja'}},
+    // carga masiva sin PDF: solo lo que dice la carpeta, resto vacío
+    {paciente:'Benítez Raúl',dni:'19876543',nacimiento:'',patologia:'Melanoma',severidad:'',fecha:'',descripcion:'',keywords:[],
+     imagenes:img('Melanoma',31,2),documentos:[],origen:'bulk',carpetaOrigen:'Melanoma/Benitez Raul - 19876543',
+     ocrConf:{paciente:'alta',dni:'alta',nacimiento:'baja',fecha:'baja',patologia:'alta',severidad:'baja',descripcion:'baja',keywords:'baja'}},
+    // carga masiva: patología de carpeta que no coincide con la lista, DNI no detectado
+    {paciente:'Silva Carolina',dni:'',nacimiento:'',patologia:'Eczema',severidad:'',fecha:'2026-01-20',descripcion:'',keywords:[],
+     imagenes:img('Dermatitis atópica',41,2),documentos:[],origen:'bulk',carpetaOrigen:'Eczema/Silva Carolina',
+     ocrConf:{paciente:'alta',dni:'baja',nacimiento:'baja',fecha:'alta',patologia:'media',severidad:'baja',descripcion:'baja',keywords:'baja'}},
+    // OCR individual con errores típicos: 0 por o en el nombre, DNI con carácter dudoso
+    {paciente:'R0drígu3z Est3ban',dni:'3345678?',nacimiento:'1988-10-11',patologia:'Acné',severidad:'Severa',fecha:'2026-02-17',
+     descripcion:'Acné noduloquístico en espalda y hombros con cicatrices hipertróficas. Se evalúa inicio de isotretinoína.',
+     keywords:['noduloquístico','espalda','cicatrices'],imagenes:img('Acné',51,2),documentos:[{nombre:'HC_rodriguez.pdf',data:PDF}],origen:'ocr',
+     ocrConf:{paciente:'baja',dni:'baja',nacimiento:'alta',fecha:'alta',patologia:'alta',severidad:'media',descripcion:'alta',keywords:'baja'}},
+    // OCR individual: paciente sin imágenes, patología mal reconocida
+    {paciente:'Molina Graciela',dni:'16789012',nacimiento:'1963-04-27',patologia:'Queratosis actínica',severidad:'Leve',fecha:'2025-12-09',
+     descripcion:'Lesiones ásperas eritematosas en dorso de manos y frente. Fotodaño crónico. Crioterapia.',
+     keywords:['fotodaño','manos','frente','crioterapia'],imagenes:[],documentos:[{nombre:'informe_molina_2025.pdf',data:PDF}],origen:'ocr',
+     ocrConf:{paciente:'alta',dni:'alta',nacimiento:'media',fecha:'media',patologia:'baja',severidad:'media',descripcion:'alta',keywords:'baja'}},
+  ];
+  return P.map((c,i)=>{ const o=Object.assign({id:'pend'+i,validacion:'pendiente',registradoPor:'',creadoEn:'2026-09-1'+i+'T09:30:00'},c);
+    o.visitas=[{id:'pend'+i+'v0',tipo:'visita',fecha:c.fecha,descripcion:c.descripcion,imagenes:c.imagenes,documentos:c.documentos||[],profesional:''}]; delete o.fecha; delete o.descripcion; delete o.imagenes; delete o.documentos; return o });
+}
+function restaurarEjemplos(){ if(confirm('Se eliminarán todos los casos actuales y se cargarán los de ejemplo. ¿Continuar?')){ casos=ejemplos(); save(); buscar(); go('buscar'); toast('Datos de ejemplo restaurados') } }
+
+// ---------- Navegación ----------
+function go(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id==='view-'+v));
+  const navV=(v==='ocr'||v==='bulk')?'importar':v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===navV));
+  if(v==='nuevo'&&!document.getElementById('f-id').value&&!ocrConf) resetForm();
+  if(v==='ocr') resetOcr();
+  if(v==='buscar') buscar();
+  if(v==='config') renderCfg();
+  if(v==='bulk') bulkReset();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ if(b.dataset.view==='nuevo'){ocrConf=null;resetForm()} go(b.dataset.view) });
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),2500) }
+
+// ---------- Formulario ----------
+function fillSelects(){
+  const fp=document.getElementById('f-patologia'), fpv=fp.value; fp.innerHTML='<option value="">Seleccionar…</option>'+cfg.patologias.map(p=>`<option>${esc(p)}</option>`).join('')+'<option value="__otra">Otra…</option>'; fp.value=fpv;
+  const usadas=[...new Set([...cfg.patologias,...casos.map(c=>c.patologia).filter(Boolean)])].sort();
+  const qp=document.getElementById('q-pat'), qpv=qp.value; qp.innerHTML='<option value="">Todas</option>'+usadas.map(p=>`<option>${esc(p)}</option>`).join(''); qp.value=qpv;
+}
+function togglePatOtra(){ const o=document.getElementById('f-patologia').value==='__otra'; const i=document.getElementById('f-patologia-otra'); i.style.display=o?'':'none'; i.required=o; if(o)i.focus() }
+function setPatologia(p){ const s=document.getElementById('f-patologia'); if(cfg.patologias.includes(p)){s.value=p}else if(p){s.value='__otra';document.getElementById('f-patologia-otra').value=p}else s.value=''; togglePatOtra() }
+function getPatologia(){ const s=document.getElementById('f-patologia').value; return s==='__otra'?document.getElementById('f-patologia-otra').value.trim():s }
+function setSev(v){ document.querySelectorAll('#f-severidad .pill').forEach(p=>p.classList.toggle('on',p.dataset.v===v)) }
+function getSev(){ const p=document.querySelector('#f-severidad .pill.on'); return p?p.dataset.v:'' }
+
+function resetForm(){
+  document.getElementById('form').reset(); document.getElementById('f-id').value='';
+  document.getElementById('f-fecha').value=hoy(); setSev(''); togglePatOtra();
+  archivos={img:[],doc:[]}; ocrConf=null; ocrDoc=null; renderFiles(); applyConf();
+  document.getElementById('form-title').textContent='Nuevo caso';
+  document.getElementById('form-sub').textContent='Cargá los datos del paciente, la primera consulta con sus imágenes y la documentación. Las visitas siguientes y la histopatología se agregan desde la ficha del caso.';
+  document.getElementById('btn-guardar').textContent='Guardar caso';
+  document.getElementById('btn-sinvalidar').style.display='none';
+  document.getElementById('ocr-notice').style.display='none';
+}
+function fillForm(c){
+  document.getElementById('f-id').value=c.id||''; document.getElementById('f-paciente').value=c.paciente||'';
+  document.getElementById('f-dni').value=c.dni||''; document.getElementById('f-nacimiento').value=c.nacimiento||'';
+  const v0=c.visitas?c.visitas[0]:{fecha:c.fecha,descripcion:c.descripcion,imagenes:c.imagenes};
+  document.getElementById('f-fecha').value=v0.fecha||hoy(); setPatologia(c.patologia||''); setSev(c.severidad||'');
+  document.getElementById('f-descripcion').value=v0.descripcion||''; document.getElementById('f-keywords').value=(c.keywords||[]).join(', ');
+  archivos={img:[...(v0.imagenes||[])],doc:[...(v0.documentos||c.documentos||[])]}; renderFiles();
+}
+function applyConf(){
+  document.querySelectorAll('.field').forEach(f=>{ f.classList.remove('conf-alta','conf-media','conf-baja'); f.querySelector('.conf')?.remove();
+    const k=f.dataset.f; if(ocrConf&&ocrConf[k]){ f.classList.add('conf-'+ocrConf[k]); f.insertAdjacentHTML('afterbegin',`<span class="conf ${ocrConf[k]}">${ocrConf[k]}</span>`) } });
+}
+function editar(id){ const c=casos.find(x=>x.id===id); if(!c)return; ocrConf=null; resetForm(); fillForm(c);
+  document.getElementById('form-title').textContent='Editar caso'; document.getElementById('form-sub').textContent=c.paciente+' · DNI '+c.dni;
+  document.getElementById('btn-guardar').textContent='Guardar cambios'; go('nuevo') }
+
+// archivos
+function addFiles(files,tipo){
+  [...files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ archivos[tipo].push({nombre:f.name,data:r.result}); renderFiles() }; r.readAsDataURL(f) });
+}
+function removeFile(tipo,i){ archivos[tipo].splice(i,1); renderFiles() }
+function renderFiles(){
+  document.getElementById('thumbs').innerHTML=archivos.img.map((f,i)=>`<div class="thumb"><img src="${f.data}" title="${esc(f.nombre)}"><button type="button" class="x" onclick="removeFile('img',${i})">✕</button></div>`).join('');
+  document.getElementById('docs').innerHTML=archivos.doc.map((f,i)=>`<div class="doc">📄 <span>${esc(f.nombre)}</span><button type="button" onclick="removeFile('doc',${i})">✕</button></div>`).join('');
+}
+['drop-img','drop-doc','drop-ocr'].forEach(id=>{ const el=document.getElementById(id);
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over')});
+  el.addEventListener('dragleave',()=>el.classList.remove('over'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');
+    if(id==='drop-ocr') iniciarOcr(e.dataTransfer.files[0]); else addFiles(e.dataTransfer.files,id==='drop-img'?'img':'doc') });
+});
+
+function guardar(e,modo){
+  if(e) e.preventDefault();
+  const form=document.getElementById('form');
+  if(modo!=='pendiente'){ if(!form.reportValidity()) return; if(!getSev()){ alert('Seleccioná la severidad del caso.'); return } }
+  // guardar sin validar: se permite dejar campos incompletos
+  const id=document.getElementById('f-id').value; const prev=casos.find(c=>c.id===id);
+  const c={ id:id||uid(), paciente:document.getElementById('f-paciente').value.trim(), dni:document.getElementById('f-dni').value.replace(/\./g,''),
+    nacimiento:document.getElementById('f-nacimiento').value, patologia:getPatologia(), severidad:getSev(),
+    keywords:document.getElementById('f-keywords').value.split(',').map(s=>s.trim()).filter(Boolean),
+    visitas:[Object.assign({id:uid(),tipo:'visita',profesional:cfg.profesional},prev?.visitas?.[0]||{},{fecha:document.getElementById('f-fecha').value,descripcion:document.getElementById('f-descripcion').value.trim(),imagenes:archivos.img,documentos:archivos.doc}),...(prev?.visitas?.slice(1)||[])],
+    registradoPor:prev?(prev.registradoPor||cfg.profesional):cfg.profesional, origen:prev?prev.origen:(ocrConf?'ocr':'manual'),
+    validacion:modo==='pendiente'?'pendiente':(ocrConf||!prev)?'validado':prev.validacion, ocrConf:prev?prev.ocrConf:ocrConf,
+    validadoPor:modo==='pendiente'?undefined:ocrConf?cfg.profesional:prev?.validadoPor, creadoEn:prev?prev.creadoEn:new Date().toISOString() };
+  if(modo!=='pendiente'&&ocrConf) c.validadoEn=new Date().toISOString();
+  if(prev) Object.assign(prev,c); else casos.unshift(c);
+  if(!save()){ if(!prev) casos.shift(); return }
+  const fueOcr=!!ocrConf; ocrConf=null; fillSelects(); resetForm();
+  toast(modo==='pendiente'?'Guardado como pendiente de validación':fueOcr?'Caso validado y guardado':prev?'Cambios guardados':'Caso guardado'); verDetalle(c.id);
+}
+
+// ---------- OCR simulado ----------
+function resetOcr(){ document.getElementById('ocr-upload').style.display=''; document.getElementById('ocr-running').style.display='none';
+  document.getElementById('ocr-bar').style.width='0'; document.querySelectorAll('#ocr-steps li').forEach(l=>l.className='') }
+function iniciarOcr(file){
+  if(!file) return; if(file.type!=='application/pdf'){ alert('Subí un archivo PDF.'); return }
+  document.getElementById('ocr-upload').style.display='none'; document.getElementById('ocr-running').style.display='';
+  document.getElementById('ocr-filename').textContent=file.name; document.getElementById('ocr-size').textContent=(file.size/1024).toFixed(0)+' KB';
+  const r=new FileReader(); r.onload=()=>{ ocrDoc={nombre:file.name,data:r.result} }; r.readAsDataURL(file);
+  const steps=[...document.querySelectorAll('#ocr-steps li')]; let i=0;
+  const tick=()=>{ if(i>0)steps[i-1].className='done'; if(i<steps.length){ steps[i].className='now'; document.getElementById('ocr-bar').style.width=((i+1)/steps.length*100)+'%'; i++; setTimeout(tick,550) } else setTimeout(()=>mostrarResultadoOcr(file.name),300) };
+  tick();
+}
+function confFicticia(){ const conf=()=>['alta','alta','alta','media','media','baja'][Math.floor(Math.random()*6)];
+  return {paciente:conf(),dni:conf(),nacimiento:conf(),fecha:conf(),patologia:conf(),severidad:'media',descripcion:conf(),keywords:'baja'} }
+function datosFicticios(){
+  const nombres=['Marcela Díaz','Federico Álvarez','Valentina Torres','Gustavo Morales','Camila Ruiz','Ezequiel Castro','Florencia Gómez','Martín Herrera'];
+  const desc={'Psoriasis':'Placas eritematosas con escama nacarada en cuero cabelludo y región lumbar. Signo de Auspitz positivo. Evolución crónica con brotes.',
+    'Dermatitis atópica':'Xerosis generalizada y eccema en flexuras. Prurito intenso nocturno. Antecedentes familiares de atopía.',
+    'Acné':'Comedones abiertos y cerrados, pápulas y pústulas en zona T. Sin lesiones nodulares.',
+    'Melanoma':'Lesión pigmentada de bordes irregulares y coloración heterogénea en pierna izquierda, 11 mm. Dermatoscopía: red atípica y velo azul-blanquecino.',
+    'Rosácea':'Eritema facial persistente con telangiectasias y pápulas inflamatorias. Flushing con calor.',
+    'Queratosis actínica':'Múltiples máculas eritematosas ásperas en frente y dorso nasal en paciente con fotodaño crónico.'};
+  const pats=Object.keys(desc); const pat=pats[Math.floor(Math.random()*pats.length)];
+  const y=2026, m=String(1+Math.floor(Math.random()*8)).padStart(2,'0'), d=String(1+Math.floor(Math.random()*28)).padStart(2,'0');
+  const by=1950+Math.floor(Math.random()*50);
+  return { paciente:nombres[Math.floor(Math.random()*nombres.length)], dni:String(15000000+Math.floor(Math.random()*30000000)),
+    nacimiento:`${by}-${String(1+Math.floor(Math.random()*12)).padStart(2,'0')}-${String(1+Math.floor(Math.random()*28)).padStart(2,'0')}`,
+    fecha:`${y}-${m}-${d}`, patologia:pat, severidad:(cfg.severidades[Math.floor(Math.random()*cfg.severidades.length)]||{}).nombre||'', descripcion:desc[pat],
+    keywords:desc[pat].toLowerCase().match(/[a-záéíóúñ]{6,}/g).slice(0,4) };
+}
+function mostrarResultadoOcr(nombreArchivo){
+  const c=datosFicticios(); const cf=confFicticia();
+  // simulo errores típicos de OCR en campos de baja confianza
+  if(cf.dni==='baja') c.dni=c.dni.slice(0,-1)+'?';
+  if(cf.paciente==='baja') c.paciente=c.paciente.replace(/o/g,'0');
+  if(cf.nacimiento==='baja') c.nacimiento='';
+  const doc=ocrDoc; resetForm(); fillForm(c); ocrConf=cf; ocrDoc=doc; applyConf();
+  archivos.doc=[ocrDoc||{nombre:nombreArchivo,data:''}]; renderFiles();
+  modoValidacion('Origen: '+nombreArchivo+' · datos extraídos por OCR');
+  go('nuevo');
+}
+function modoValidacion(sub){
+  document.getElementById('form-title').textContent='Validar caso importado';
+  document.getElementById('form-sub').textContent=sub;
+  document.getElementById('btn-guardar').textContent='✓ Validar y guardar';
+  document.getElementById('btn-sinvalidar').style.display='';
+  document.getElementById('ocr-notice').style.display='';
+}
+// revisar un caso pendiente ya guardado
+function revisar(id){ const c=casos.find(x=>x.id===id); if(!c) return; resetForm(); fillForm(c); ocrConf=c.ocrConf||{}; applyConf();
+  modoValidacion(`${c.paciente||'(sin nombre)'} · origen: ${c.origen==='bulk'?'carga masiva':'OCR'} · pendiente de validación`); go('nuevo') }
+
+// ---------- Carga masiva ----------
+let bulkCasos=[];
+function bulkReset(){ bulkCasos=[]; document.getElementById('bulk-preview').style.display='none'; document.getElementById('bulk-running').style.display='none';
+  document.getElementById('drop-bulk').style.display=''; document.getElementById('bulk-estructura').textContent=bulkEjemplo() }
+function parsePaciente(nombre){ let dni=''; let pac=nombre;
+  if(cfg.bulk.dniEnCarpeta){ const m=nombre.match(/^(.*?)[\s\-_]+(\d{6,10})\s*$/); if(m){ pac=m[1]; dni=m[2] } }
+  return {paciente:pac.replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim(), dni} }
+const norm=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+function matchPatologia(nombre){ const n=norm(nombre); return cfg.patologias.find(p=>norm(p)===n)||cfg.patologias.find(p=>n.includes(norm(p))||norm(p).includes(n))||'' }
+// Recibe una FileList con webkitRelativePath (input webkitdirectory) o archivos con .path inyectado (drop)
+function bulkFiles(files){
+  const grupos={};
+  [...files].forEach(f=>{ const rel=(f._path||f.webkitRelativePath||f.name).split('/'); if(rel.length<2) return;
+    const esImg=/^image\//.test(f.type), esPdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name); if(!esImg&&!esPdf) return;
+    const carpeta=rel.slice(1,-1); const key=carpeta.join('/'); (grupos[key]=grupos[key]||{carpeta,img:[],doc:[]})[esImg?'img':'doc'].push(f) });
+  bulkCasos=Object.values(grupos).map(g=>{
+    const c={carpeta:g.carpeta.join('/'),paciente:'',dni:'',patologia:'',fecha:'',avisos:[],img:g.img,doc:g.doc};
+    cfg.bulk.niveles.forEach((tipo,i)=>{ const seg=g.carpeta[i]; if(!seg) return;
+      if(tipo==='paciente'){ const r=parsePaciente(seg); c.paciente=r.paciente; c.dni=r.dni; if(cfg.bulk.dniEnCarpeta&&!r.dni) c.avisos.push('DNI no detectado en carpeta') }
+      else if(tipo==='patologia'){ c.patologia=matchPatologia(seg); if(!c.patologia){ c.patologia=seg; c.avisos.push('patología no está en la lista configurada') } }
+      else if(tipo==='fecha'){ if(/^\d{4}-\d{2}-\d{2}$/.test(seg)) c.fecha=seg; else c.avisos.push('fecha no reconocida: '+seg) } });
+    if(g.carpeta.length<cfg.bulk.niveles.length) c.avisos.push('profundidad menor a la configurada');
+    if(g.carpeta.length>cfg.bulk.niveles.length) c.avisos.push('subcarpetas extra: '+g.carpeta.slice(cfg.bulk.niveles.length).join('/'));
+    if(!c.img.length) c.avisos.push('sin imágenes'); if(!c.doc.length) c.avisos.push('sin PDF (no se aplicará OCR)');
+    return c });
+  if(!bulkCasos.length){ alert('No se encontraron carpetas con imágenes o PDFs.'); return }
+  document.getElementById('drop-bulk').style.display='none'; document.getElementById('bulk-preview').style.display='';
+  const conAviso=bulkCasos.filter(c=>c.avisos.length).length;
+  document.getElementById('bulk-resumen').innerHTML=`<strong>${bulkCasos.length}</strong> casos detectados${conAviso?` · <span style="color:var(--moderada)">${conAviso} con avisos</span>`:''}`;
+  document.getElementById('bulk-go').textContent=`Importar ${bulkCasos.length} casos`;
+  document.getElementById('bulk-rows').innerHTML=bulkCasos.map(c=>`<tr><td><code class="path">${esc(c.carpeta)}</code></td><td>${esc(c.paciente)||'<em>OCR</em>'}</td><td>${esc(c.dni)||'<em>OCR</em>'}</td><td>${esc(c.patologia)||'<em>OCR</em>'}</td><td>${c.fecha?fmt(c.fecha):'<em>OCR</em>'}</td><td>${c.img.length}</td><td>${c.doc.length}</td><td class="warn">${c.avisos.map(esc).join('<br>')}</td></tr>`).join('');
+}
+const leerDataUrl=f=>new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(''); r.readAsDataURL(f) });
+async function bulkImportar(){
+  document.getElementById('bulk-preview').style.display='none'; document.getElementById('bulk-running').style.display='';
+  const nuevos=[]; let i=0;
+  for(const b of bulkCasos){ i++;
+    document.getElementById('bulk-status').textContent=`Procesando ${i} de ${bulkCasos.length}: ${b.carpeta} — leyendo archivos y aplicando OCR…`;
+    document.getElementById('bulk-bar').style.width=(i/bulkCasos.length*100)+'%';
+    const imagenes=[]; for(const f of b.img) imagenes.push({nombre:f.name,data:await leerDataUrl(f)});
+    const documentos=[]; for(const f of b.doc) documentos.push({nombre:f.name,data:await leerDataUrl(f)});
+    const fic=datosFicticios(), cf=confFicticia();
+    // lo que viene de la carpeta tiene confianza alta; el resto sale del OCR simulado (si hay PDF) o queda vacío
+    const hayPdf=b.doc.length>0;
+    const c={ id:uid(), paciente:b.paciente||(hayPdf?fic.paciente:''), dni:b.dni||(hayPdf?fic.dni:''), nacimiento:hayPdf?fic.nacimiento:'',
+      patologia:b.patologia||(hayPdf?fic.patologia:''), severidad:hayPdf?fic.severidad:'', keywords:hayPdf?fic.keywords:[],
+      visitas:[{id:uid(),tipo:'visita',fecha:b.fecha||(hayPdf?fic.fecha:''),descripcion:hayPdf?fic.descripcion:'',imagenes,documentos,profesional:''}], origen:'bulk', validacion:'pendiente', carpetaOrigen:b.carpeta, registradoPor:cfg.profesional, creadoEn:new Date().toISOString(),
+      ocrConf:{...cf, paciente:b.paciente?'alta':cf.paciente, dni:b.dni?'alta':(cfg.bulk.dniEnCarpeta?'baja':cf.dni), patologia:b.patologia&&!b.avisos.some(a=>a.startsWith('patología'))?'alta':b.patologia?'media':cf.patologia, fecha:b.fecha?'alta':cf.fecha} };
+    if(!hayPdf) Object.keys(c.ocrConf).forEach(k=>{ if(c.ocrConf[k]!=='alta') c.ocrConf[k]='baja' });
+    nuevos.push(c); await new Promise(r=>setTimeout(r,250));
+  }
+  casos.unshift(...nuevos);
+  if(!save()){ casos.splice(0,nuevos.length); bulkReset(); return }
+  fillSelects(); bulkReset(); toast(`${nuevos.length} casos importados como pendientes de validación`);
+  document.getElementById('q-val').value='pendiente'; go('buscar');
+}
+// drop de carpeta: recorrer entradas del sistema de archivos
+async function bulkDrop(dt){
+  const files=[]; const walk=(entry,path)=>new Promise(res=>{
+    if(entry.isFile) entry.file(f=>{ f._path=path+f.name; files.push(f); res() },()=>res());
+    else if(entry.isDirectory){ const rd=entry.createReader(); const all=[]; const next=()=>rd.readEntries(async es=>{ if(!es.length){ for(const e of all) await walk(e,path+entry.name+'/'); res() } else { all.push(...es); next() } }); next() } else res() });
+  const entries=[...dt.items].map(it=>it.webkitGetAsEntry&&it.webkitGetAsEntry()).filter(Boolean);
+  for(const e of entries) await walk(e,'');
+  if(files.length) bulkFiles(files); else alert('Arrastrá una carpeta (no archivos sueltos).');
+}
+[['m-drop-img','img'],['m-drop-doc','doc']].forEach(([id,t])=>{ const el=document.getElementById(id); el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over')}); el.addEventListener('dragleave',()=>el.classList.remove('over')); el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');mAdd(e.dataTransfer.files,t)}) });
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') cerrarModal() });
+(()=>{ const el=document.getElementById('drop-bulk'); el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over')}); el.addEventListener('dragleave',()=>el.classList.remove('over'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');bulkDrop(e.dataTransfer)}) })();
+
+// ---------- Búsqueda ----------
+function limpiarFiltros(){ ['q','q-pat','q-sev','q-origen','q-val','q-desde','q-hasta'].forEach(i=>document.getElementById(i).value=''); buscar() }
+function buscar(){
+  const q=document.getElementById('q').value.trim().toLowerCase(), pat=document.getElementById('q-pat').value, sev=document.getElementById('q-sev').value,
+    ori=document.getElementById('q-origen').value, val=document.getElementById('q-val').value, desde=document.getElementById('q-desde').value, hasta=document.getElementById('q-hasta').value;
+  const r=casos.filter(c=>{
+    if(pat&&c.patologia!==pat) return false; if(sev&&c.severidad!==sev) return false; if(ori&&c.origen!==ori) return false; if(val&&(c.validacion||'validado')!==val) return false;
+    const uf=ultimaFecha(c); if(desde&&uf<desde) return false; if(hasta&&uf>hasta) return false;
+    if(q){ const blob=[c.paciente,c.dni,c.patologia,...(c.keywords||[]),...c.visitas.map(v=>v.descripcion)].join(' ').toLowerCase(); if(!blob.includes(q)) return false }
+    return true;
+  }).sort((a,b)=>ultimaFecha(b).localeCompare(ultimaFecha(a)));
+  const pend=casos.filter(c=>c.validacion==='pendiente').length; const ap=document.getElementById('alert-pend');
+  ap.style.display=pend&&val!=='pendiente'?'':'none'; ap.innerHTML=`<span>⚠ Hay <strong>${pend}</strong> caso${pend!==1?'s':''} pendiente${pend!==1?'s':''} de validación por un médico.</span><button class="btn sm" onclick="document.getElementById('q-val').value='pendiente';buscar()">Ver pendientes</button>`;
+  document.getElementById('count').textContent=`${r.length} caso${r.length!==1?'s':''} encontrado${r.length!==1?'s':''} de ${casos.length}`;
+  document.getElementById('results').innerHTML=r.length?r.map(c=>`
+    <div class="case" onclick="verDetalle('${c.id}')">
+      <div class="img">${(()=>{ const v=visitasOrd(c).find(v=>v.tipo!=='histopatologia'&&v.imagenes?.length)||visitasOrd(c).find(v=>v.imagenes?.length); return v?`<img src="${v.imagenes[0].data}">`:'Sin imágenes' })()}</div>
+      <div class="body"><div class="name">${esc(c.paciente)||'<em style="color:var(--muted)">Sin nombre</em>'}</div><div class="meta">DNI ${esc(c.dni)} · ${soloVisitas(c).length>1?`${soloVisitas(c).length} visitas · última `:''}${fmt(ultimaFecha(c))}</div>
+        <div class="row"><strong style="font-size:14px">${esc(c.patologia)||'<em style="color:var(--muted);font-weight:400">Sin patología</em>'}</strong></div>
+        <div class="row" style="margin-top:8px">${c.severidad?sevBadge(c.severidad):''}<span class="badge ${c.origen}">${origenLabel(c.origen)}</span>${c.validacion==='pendiente'?'<span class="badge pendiente">⚠ Pendiente</span>':''}${tieneHisto(c)?'<span class="badge histo">🔬 Histo</span>':''}
+          <span style="color:var(--muted);font-size:12px;margin-left:auto">📷 ${todasImg(c).length} · 📄 ${todosDocs(c).length}</span></div></div>
+    </div>`).join(''):'<div class="empty" style="grid-column:1/-1">No se encontraron casos con esos criterios.</div>';
+}
+
+// ---------- Detalle ----------
+const origenLabel=o=>({manual:'Manual',ocr:'OCR',bulk:'Carga masiva'})[o]||o;
+let lbImgs=[]; // galería activa para el lightbox
+const docRow=(d,i)=>`<div class="doc">📄 <span>${esc(d.nombre)}</span>${d.data?`<a class="btn secondary sm" href="${d.data}" download="${esc(d.nombre)}">Descargar</a> <button class="btn secondary sm" onclick="abrirPdfIdx(${i})">Abrir</button>`:'<em style="color:var(--muted)">sin archivo</em>'}</div>`;
+let lbDocs=[];
+function galeria(imgs,cls){ return `<div class="gallery ${cls||''}">${imgs.map(i=>{ lbImgs.push(i); return `<img src="${i.data}" title="${esc(i.nombre)}" onclick="lightbox(${lbImgs.length-1})">` }).join('')||'<span style="color:var(--muted);font-size:13px">Sin imágenes</span>'}</div>` }
+function docsList(docs){ return `<div class="docs">${docs.map(d=>{ lbDocs.push(d); return docRow(d,lbDocs.length-1) }).join('')||'<span style="color:var(--muted);font-size:13px">Sin documentos</span>'}</div>` }
+function verDetalle(id){
+  const c=casos.find(x=>x.id===id); if(!c) return; lbImgs=[]; lbDocs=[];
+  const ref=primeraFecha(c)||hoy(); const edad=c.nacimiento?Math.floor((new Date(ref)-new Date(c.nacimiento))/31557600000)+' años':'';
+  const orden=visitasOrd(c); const nv=soloVisitas(c).length; const nh=c.visitas.length-nv;
+  // numeración cronológica de las visitas (sin contar histopatologías)
+  const numero={}; [...c.visitas].filter(v=>v.tipo!=='histopatologia').sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||'')).forEach((v,i)=>numero[v.id]=i+1);
+  document.getElementById('detalle').innerHTML=`
+    <div class="detail-head"><div><h1 style="margin:0">${esc(c.paciente)||'<em style="color:var(--muted)">Sin nombre</em>'}</h1><div style="color:var(--muted)">DNI ${esc(c.dni)||'—'}${edad?' · '+edad:''}</div>
+      <div style="margin-top:8px">${c.severidad?sevBadge(c.severidad):''} <span class="badge ${c.origen}">${c.origen==='manual'?'Carga manual':c.origen==='bulk'?'Carga masiva'+(c.carpetaOrigen?' · '+esc(c.carpetaOrigen):''):'Importado por OCR'}</span>
+        ${c.validacion==='pendiente'?'<span class="badge pendiente">⚠ Pendiente de validación</span>':c.origen!=='manual'?`<span class="badge validado">✓ Validado${c.validadoPor?' por '+esc(c.validadoPor):''}${c.validadoEn?' · '+new Date(c.validadoEn).toLocaleDateString('es-AR'):''}</span>`:''}${nh?'<span class="badge histo">🔬 Con histopatología</span>':''}</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${c.validacion==='pendiente'?`<button class="btn sm" onclick="revisar('${c.id}')">✓ Revisar y validar</button>`:''}<button class="btn secondary sm" onclick="editar('${c.id}')">✎ Editar datos</button><button class="btn danger sm" onclick="eliminar('${c.id}')">🗑 Eliminar</button></div></div>
+    <dl class="kv"><dt>Patología</dt><dd><strong>${esc(c.patologia)||'—'}</strong></dd><dt>Primera consulta</dt><dd>${fmt(primeraFecha(c))}</dd><dt>Última entrada</dt><dd>${fmt(ultimaFecha(c))} · ${nv} visita${nv!==1?'s':''}${nh?` · ${nh} histopatología${nh!==1?'s':''}`:''}</dd><dt>Fecha de nacimiento</dt><dd>${fmt(c.nacimiento)}</dd>
+      <dt>Palabras clave</dt><dd>${(c.keywords||[]).map(k=>`<span class="kw">${esc(k)}</span>`).join('')||'—'}</dd><dt>Registrado</dt><dd>${new Date(c.creadoEn).toLocaleString('es-AR')}${c.registradoPor?' · '+esc(c.registradoPor):''}</dd></dl>
+
+    <div class="sec-head"><h3>Evolución</h3><div style="display:flex;gap:8px"><button class="btn sm" onclick="abrirVisita('${c.id}')">+ Nueva visita</button><button class="btn secondary sm" onclick="abrirHisto('${c.id}')">🔬 + Histopatología</button></div></div>
+    <div class="timeline">${orden.map(v=>{ const h=v.tipo==='histopatologia'; return `<div class="visita ${h?'histopatologia':''}">
+        <div class="vh"><div><strong>${fmt(v.fecha)}</strong> <span class="tipo">${h?'🔬 Histopatología':'Visita '+numero[v.id]+' de '+nv}</span> <span class="n">${numero[v.id]===1&&!h?'(inicial) ':''}${v.profesional?'· '+esc(v.profesional):''}</span></div>
+          <div style="display:flex;gap:6px"><button class="btn secondary sm" onclick="${h?'abrirHisto':'abrirVisita'}('${c.id}','${v.id}')">✎</button>${c.visitas.length>1?`<button class="btn danger sm" onclick="eliminarVisita('${c.id}','${v.id}')">🗑</button>`:''}</div></div>
+        <div class="${h?'cuerpo':''}">
+        <p>${esc(v.descripcion)||'<span style="color:var(--muted)">'+(h?'Sin diagnóstico anatomopatológico':'Sin descripción')+'</span>'}</p>
+        ${h?'<div style="font-size:12px;color:var(--muted);margin-top:8px">Imágenes de microscopía</div>':''}${galeria(v.imagenes||[])}
+        ${v.documentos?.length?`<div style="font-size:12px;color:var(--muted);margin-top:8px">${h?'Informes':'Documentos'}</div>`+docsList(v.documentos):''}</div>
+      </div>` }).join('')}</div>`;
+  go('detalle');
+}
+function lightbox(i){ document.getElementById('lightbox-img').src=lbImgs[i].data; document.getElementById('lightbox').classList.add('on') }
+function abrirPdfIdx(i){ const d=lbDocs[i]; const w=window.open(''); w.document.write(`<title>${esc(d.nombre)}</title><iframe src="${d.data}" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe>`) }
+
+// ---------- Modal de visita / histopatología ----------
+let modal=null; // {tipo:'visita'|'histopatologia', caseId, visitaId}
+let mArch={img:[],doc:[]};
+function mRender(){
+  document.getElementById('m-thumbs').innerHTML=mArch.img.map((f,i)=>`<div class="thumb"><img src="${f.data}" title="${esc(f.nombre)}"><button type="button" class="x" onclick="mRemove('img',${i})">✕</button></div>`).join('');
+  document.getElementById('m-docs').innerHTML=mArch.doc.map((f,i)=>`<div class="doc">📄 <span>${esc(f.nombre)}</span><button type="button" onclick="mRemove('doc',${i})">✕</button></div>`).join('');
+}
+function mAdd(files,tipo){ [...files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ mArch[tipo].push({nombre:f.name,data:r.result}); mRender() }; r.readAsDataURL(f) }) }
+function mRemove(tipo,i){ mArch[tipo].splice(i,1); mRender() }
+function cerrarModal(){ document.getElementById('modal').classList.remove('on'); modal=null }
+function abrirModalBase(t){
+  document.getElementById('m-title').textContent=t.title; document.getElementById('m-sub').textContent=t.sub;
+  document.getElementById('m-fecha-label').textContent=t.fechaLabel; document.getElementById('m-desc-label').textContent=t.descLabel;
+  document.getElementById('m-img-label').textContent=t.imgLabel; document.getElementById('m-doc-label').textContent=t.docLabel;
+  document.getElementById('m-desc').placeholder=t.placeholder||'';
+  document.getElementById('m-fecha').value=t.fecha||hoy(); document.getElementById('m-desc').value=t.descripcion||''; document.getElementById('m-prof').value=t.profesional??cfg.profesional;
+  mArch={img:[...(t.imagenes||[])],doc:[...(t.documentos||[])]}; mRender();
+  document.getElementById('modal').classList.add('on'); document.getElementById('m-fecha').focus();
+}
+function abrirVisita(caseId,visitaId){
+  const c=casos.find(x=>x.id===caseId); const v=visitaId?c.visitas.find(x=>x.id===visitaId):null; modal={tipo:'visita',caseId,visitaId};
+  abrirModalBase({title:v?'Editar visita':'Nueva visita',sub:`${c.paciente||'(sin nombre)'} · ${c.patologia||''}`,fechaLabel:'Fecha de la visita *',descLabel:'Evolución / descripción clínica',
+    imgLabel:'Imágenes de esta visita',docLabel:'Documentos de la visita (PDF)',placeholder:'Estado de las lesiones, respuesta al tratamiento, cambios indicados…',
+    fecha:v?.fecha,descripcion:v?.descripcion,profesional:v?.profesional,imagenes:v?.imagenes,documentos:v?.documentos});
+}
+function abrirHisto(caseId,visitaId){
+  const c=casos.find(x=>x.id===caseId); const h=visitaId?c.visitas.find(x=>x.id===visitaId):null; modal={tipo:'histopatologia',caseId,visitaId};
+  abrirModalBase({title:h?'Editar histopatología':'Agregar histopatología',sub:`${c.paciente||'(sin nombre)'} · ${c.patologia||''}`,fechaLabel:'Fecha de la biopsia / estudio *',descLabel:'Diagnóstico anatomopatológico',
+    imgLabel:'Imágenes de microscopía',docLabel:'Informes (PDF)',placeholder:'Descripción microscópica, diagnóstico, márgenes, Breslow, etc.',
+    fecha:h?.fecha,descripcion:h?.descripcion,profesional:h?.profesional??'',imagenes:h?.imagenes,documentos:h?.documentos});
+}
+function modalGuardar(e){
+  e.preventDefault(); if(!modal) return; const c=casos.find(x=>x.id===modal.caseId); if(!c) return;
+  const datos={tipo:modal.tipo,fecha:document.getElementById('m-fecha').value,descripcion:document.getElementById('m-desc').value.trim(),profesional:document.getElementById('m-prof').value.trim(),imagenes:mArch.img,documentos:mArch.doc};
+  const backup=JSON.stringify(c);
+  if(modal.visitaId) Object.assign(c.visitas.find(x=>x.id===modal.visitaId),datos); else c.visitas.push(Object.assign({id:uid()},datos));
+  if(!save()){ Object.assign(c,JSON.parse(backup)); return }
+  cerrarModal(); toast('Guardado'); verDetalle(c.id);
+}
+function eliminarVisita(caseId,visitaId){ const c=casos.find(x=>x.id===caseId); const v=c.visitas.find(x=>x.id===visitaId); if(c.visitas.length<2) return;
+  if(!confirm(`¿Eliminar esta ${v.tipo==='histopatologia'?'histopatología':'visita'} con sus imágenes y documentos?`)) return; c.visitas=c.visitas.filter(x=>x.id!==visitaId); save(); toast('Entrada eliminada'); verDetalle(caseId) }
+function eliminar(id){ const c=casos.find(x=>x.id===id); if(!confirm(`¿Eliminar el caso de ${c.paciente}? Esta acción no se puede deshacer.`)) return; casos=casos.filter(x=>x.id!==id); save(); fillSelects(); toast('Caso eliminado'); go('buscar') }
+
+// ---------- Export / import ----------
+function exportar(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({config:cfg,casos},null,2)],{type:'application/json'})); a.download='dermacasos-'+hoy()+'.json'; a.click(); toast('Exportados '+casos.length+' casos') }
+function importar(input){ const f=input.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ let arr=JSON.parse(r.result); if(arr&&!Array.isArray(arr)&&Array.isArray(arr.casos)){ if(arr.config) cfg=Object.assign(CFG_DEFAULT(),arr.config); arr=arr.casos } if(!Array.isArray(arr)) throw 0;
+  let n=0; arr.forEach(c=>{ if(!c.id) c.id=uid(); normalizar(c); const i=casos.findIndex(x=>x.id===c.id); if(i>=0) casos[i]=c; else {casos.push(c);n++} }); save(); saveCfg(); buscar(); go('buscar'); toast(`Importados ${n} casos nuevos (${arr.length-n} actualizados)`) }
+  catch(e){ alert('El archivo no es un JSON válido de DermaCasos.') } input.value='' }; r.readAsText(f) }
+
+// ---------- Init ----------
+load(); loadCfg(); applyCfg(); resetForm(); go('buscar');
+</script>
+</body>
+</html>
