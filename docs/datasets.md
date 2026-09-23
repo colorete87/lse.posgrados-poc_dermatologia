@@ -4,17 +4,19 @@ Relevamiento de datasets públicos con imágenes de patologías de piel, útiles
 
 Salvo que se indique lo contrario, los datasets son de uso **académico / no comercial**. Verificar la licencia de cada uno antes de incorporarlo a un producto.
 
+> Enlaces y cifras verificados en septiembre de 2026. Varios datasets exigen registro o un acuerdo de uso para investigación; el tamaño del ISIC Archive crece de forma continua.
+
 ## Resumen
 
 | Dataset | Imágenes | Tipo de imagen | Categorías | Uso principal |
 |---|---|---|---|---|
-| ISIC Archive | > 85.000 | Dermatoscópica | Cáncer de piel y lesiones benignas | Clasificación de melanoma, benchmark |
+| ISIC Archive | > 549.000 públicas | Dermatoscópica | Cáncer de piel y lesiones benignas | Clasificación de melanoma, benchmark |
 | HAM10000 | 10.015 | Dermatoscópica | 7 clases | Clasificación general, modelos introductorios |
 | DDI | 656 | Clínica | Benignas / malignas, por fototipo | Equidad y sesgo por tono de piel |
 | Fitzpatrick 17K | 16.577 | Clínica | 114 condiciones + fototipo | Modelos robustos a diversidad demográfica |
 | SkinCAP | 4.000 | Clínica | Varias, con descripciones en texto | Modelos visión-lenguaje |
 | SD-198 | 6.584 | Clínica | 198 condiciones | Clasificación multiclase clínica |
-| BCN20000 | 26.426 | Dermatoscópica | 8 tipos de lesión | Deep learning clínico y dermatoscópico |
+| BCN20000 | 19.424 | Dermatoscópica | 8 tipos de lesión | Deep learning clínico y dermatoscópico |
 | PAD-UFES-20 | 2.298 | Clínica (smartphone) | 6 diagnósticos + metadatos | Aplicaciones móviles |
 | PH² | 200 | Dermatoscópica | Melanoma, nevos atípicos y comunes | Segmentación |
 | Derm7pt | 1.011 | Dermatoscópica + clínica | Melanoma / no melanoma, checklist de 7 puntos | IA explicable |
@@ -23,7 +25,7 @@ Salvo que se indique lo contrario, los datasets son de uso **académico / no com
 
 El repositorio público más grande y usado de imágenes dermatoscópicas. Es la base de los *ISIC Challenges* anuales (2016 en adelante).
 
-- **Tamaño:** más de 85.000 imágenes.
+- **Tamaño:** más de 549.000 imágenes públicas (más de 1,2 millones incluyendo las de acceso restringido), a septiembre de 2026.
 - **Categorías:** principalmente cáncer de piel — melanoma, carcinoma basocelular, carcinoma espinocelular — y diversas lesiones benignas.
 - **Tipo de imagen:** dermatoscópica de alta resolución, con metadatos (edad, sexo, localización, diagnóstico y método de confirmación).
 - **Ideal para:** clasificación de melanoma y benchmarking de modelos.
@@ -50,7 +52,7 @@ Diseñado para evaluar el sesgo racial de los algoritmos, garantizando represent
 - **Categorías:** lesiones benignas y malignas.
 - **Particularidad:** cada imagen está clasificada por fototipo de Fitzpatrick (I-VI), pensado para comparar piel clara (FST I-II) contra piel oscura (FST V-VI).
 - **Ideal para:** evaluar equidad y reducir sesgos en detección de enfermedades de piel.
-- **Acceso:** https://ddi-dataset.github.io
+- **Acceso:** https://ddi-dataset.github.io — la descarga requiere registro en el Stanford AIMI Shared Datasets Portal y aceptar un acuerdo de uso para investigación (no comercial).
 - **Referencia:** Daneshjou R. et al. *Science Advances*, 2022.
 
 ## 4. Fitzpatrick 17K
@@ -61,7 +63,7 @@ Otro dataset centrado en la diversidad de tonos de piel.
 - **Categorías:** 114 condiciones de piel.
 - **Particularidad:** anotado tanto con la condición como con el fototipo de Fitzpatrick. Las imágenes provienen de atlas dermatológicos en línea (DermaAmin y Atlas Dermatologico).
 - **Ideal para:** entrenar modelos robustos que funcionen en poblaciones diversas.
-- **Acceso:** https://github.com/mattgroh/fitzpatrick17k
+- **Acceso:** https://github.com/mattgroh/fitzpatrick17k — el repositorio contiene el CSV de anotaciones con las URLs de origen; muchas de esas URLs ya no funcionan, por lo que conviene pedir el conjunto de imágenes a los autores mediante el formulario indicado en el repositorio. Licencia de las imágenes: CC BY-NC-SA 3.0.
 - **Referencia:** Groh M. et al. *CVPR Workshops*, 2021.
 
 ## 5. SkinCAP
@@ -72,7 +74,7 @@ Dataset multimodal que combina imágenes con descripciones en lenguaje natural.
 - **Categorías:** diversas enfermedades de piel.
 - **Particularidad:** anotado por dermatólogos certificados con descripciones médicas extensas y *captions*.
 - **Ideal para:** modelos visión-lenguaje y generación de descripciones de lesiones. Muy relevante si se quiere asistir la redacción de la descripción clínica a partir de la foto.
-- **Acceso:** https://huggingface.co/datasets/joshuachou/SkinCAP
+- **Acceso:** https://huggingface.co/datasets/joshuachou/SkinCAP — requiere aceptar un acuerdo de uso para investigación y, además, tener acceso concedido a los datasets de origen (Fitzpatrick 17K, DDI y SKINCON). Licencia CC BY-NC-SA 4.0.
 - **Referencia:** Zhou J. et al., 2024 (arXiv:2405.18004).
 
 ## 6. SD-198
@@ -81,20 +83,20 @@ Dataset de imágenes **clínicas** (no dermatoscópicas) con gran cantidad de cl
 
 - **Tamaño:** 6.584 imágenes.
 - **Categorías:** 198 condiciones distintas, desde eccema y acné hasta patologías raras.
-- **Ideal para:** dermatología clínica general y clasificación multiclase. Existe una variante reducida, SD-136, con las clases que tienen al menos 20 imágenes.
-- **Acceso:** se solicita a los autores (ver paper).
+- **Ideal para:** dermatología clínica general y clasificación multiclase. Existe un subconjunto estándar reducido, **SD-128** (~5.600 imágenes), con las 128 clases que tienen más de 20 muestras.
+- **Acceso:** se solicita a los autores (ver paper). Se cita como página del proyecto http://xiaopingwu.cn/assets/projects/sd-198/, que al momento de este relevamiento no respondía.
 - **Referencia:** Sun X. et al. *A Benchmark for Automatic Visual Classification of Clinical Skin Disease Images*, ECCV 2016.
 
 ## 7. BCN20000
 
 Desarrollado por el Hospital Clínic de Barcelona; formó parte del ISIC Challenge 2019.
 
-- **Tamaño:** 26.426 imágenes (19.424 con diagnóstico confirmado).
+- **Tamaño:** 19.424 imágenes de 5.583 lesiones (la colección publicada en el ISIC Archive lista 18.946).
 - **Categorías:** 8 tipos de lesión — melanoma, nevo, carcinoma basocelular, queratosis actínica, queratosis seborreica, dermatofibroma, lesión vascular, carcinoma espinocelular.
 - **Particularidad:** incluye lesiones en localizaciones difíciles (uñas, mucosas) y lesiones grandes que no entran en el campo del dermatoscopio.
 - **Ideal para:** entrenar modelos de deep learning clínicos y dermatoscópicos.
-- **Acceso:** a través del ISIC Archive (colección BCN20000).
-- **Referencia:** Combalia M. et al., 2019 (arXiv:1908.02288).
+- **Acceso:** fuente oficial en Figshare, DOI 10.6084/m9.figshare.24140028 (licencia CC BY 4.0). También disponible en el ISIC Archive: https://api.isic-archive.com/collections/249/
+- **Referencia:** Combalia M. et al., 2019 (arXiv:1908.02288); data descriptor en *Scientific Data*, 2024.
 
 ## 8. PAD-UFES-20
 
@@ -127,8 +129,8 @@ Construido alrededor del *checklist de 7 puntos* para diagnóstico de melanoma.
 - **Categorías:** melanoma y no melanoma.
 - **Particularidad:** anotaciones de cada criterio del checklist (red pigmentada atípica, velo azul-blanquecino, estrías, puntos/glóbulos irregulares, manchas, áreas de regresión, vasos), más metadatos del paciente.
 - **Ideal para:** IA explicable (XAI) y clasificación basada en características.
-- **Acceso:** https://derm.cs.sfu.ca
-- **Referencia:** Kawahara J. et al. *IEEE JBHI*, 2019.
+- **Acceso:** https://derm.cs.sfu.ca · código de referencia: https://github.com/jeremykawahara/derm7pt
+- **Referencia:** Kawahara J. et al. *IEEE Journal of Biomedical and Health Informatics*, vol. 23, n.º 2, pp. 538-546, 2019.
 
 ## Consideraciones para este proyecto
 
