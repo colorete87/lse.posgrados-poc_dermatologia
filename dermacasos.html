@@ -118,8 +118,9 @@
   .levels .sep{color:var(--muted)}
   code.path{background:var(--bg);padding:2px 6px;border-radius:5px;font-size:13px}
   /* búsqueda */
-  .filters{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;align-items:end}
-  @media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
+  .filters{display:grid;gap:10px 12px;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));align-items:end}
+  .filters .ancho{grid-column:span 2}
+  @media(max-width:900px){.filters{grid-template-columns:1fr 1fr}.filters .ancho{grid-column:span 2}}
   .results{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:18px}
   .case{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column}
   .case:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
@@ -324,13 +325,15 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="ocrConf=null;resetForm();go('nuevo')">➕ Nuevo caso</button><button class="btn secondary" onclick="go('importar')">📥 Importar caso</button></div></div>
     <div class="card">
       <div class="filters">
-        <div><label>Búsqueda libre</label><input type="text" id="q" placeholder="Nombre, DNI, palabra clave, descripción…" oninput="buscar()"></div>
+        <div class="ancho"><label>Búsqueda libre</label><input type="text" id="q" placeholder="Nombre, DNI, palabra clave, descripción…" oninput="buscar()"></div>
         <div><label>Patología</label><select id="q-pat" onchange="buscar()"></select></div>
         <div><label>Severidad</label><select id="q-sev" onchange="buscar()"></select></div>
         <div><label>Origen</label><select id="q-origen" onchange="buscar()"><option value="">Todos</option><option value="manual">Carga manual</option><option value="ocr">Importado OCR</option><option value="bulk">Carga masiva</option></select></div>
         <div><label>Validación</label><select id="q-val" onchange="buscar()"><option value="">Todas</option><option value="pendiente">Pendientes</option><option value="validado">Validadas</option></select></div>
         <div><label>Última visita desde</label><input type="date" id="q-desde" onchange="buscar()"></div>
         <div><label>Última visita hasta</label><input type="date" id="q-hasta" onchange="buscar()"></div>
+        <div><label>Nacimiento desde</label><input type="date" id="q-nac-desde" onchange="buscar()"></div>
+        <div><label>Nacimiento hasta</label><input type="date" id="q-nac-hasta" onchange="buscar()"></div>
       </div>
       <div style="margin-top:10px"><button class="btn secondary sm" onclick="limpiarFiltros()">Limpiar filtros</button></div>
     </div>
@@ -857,13 +860,17 @@ document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id===
   el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');bulkDrop(e.dataTransfer)}) })();
 
 // ---------- Búsqueda ----------
-function limpiarFiltros(){ ['q','q-pat','q-sev','q-origen','q-val','q-desde','q-hasta'].forEach(i=>document.getElementById(i).value=''); buscar() }
+function limpiarFiltros(){ ['q','q-pat','q-sev','q-origen','q-val','q-desde','q-hasta','q-nac-desde','q-nac-hasta'].forEach(i=>document.getElementById(i).value=''); buscar() }
 function buscar(){
   const q=document.getElementById('q').value.trim().toLowerCase(), pat=document.getElementById('q-pat').value, sev=document.getElementById('q-sev').value,
-    ori=document.getElementById('q-origen').value, val=document.getElementById('q-val').value, desde=document.getElementById('q-desde').value, hasta=document.getElementById('q-hasta').value;
+    ori=document.getElementById('q-origen').value, val=document.getElementById('q-val').value, desde=document.getElementById('q-desde').value, hasta=document.getElementById('q-hasta').value,
+    nacDesde=document.getElementById('q-nac-desde').value, nacHasta=document.getElementById('q-nac-hasta').value;
   const r=casos.filter(c=>{
     if(pat&&c.patologia!==pat) return false; if(sev&&c.severidad!==sev) return false; if(ori&&c.origen!==ori) return false; if(val&&(c.validacion||'validado')!==val) return false;
     const uf=ultimaFecha(c); if(desde&&uf<desde) return false; if(hasta&&uf>hasta) return false;
+    // sin fecha de nacimiento cargada, el caso no entra en un filtro por nacimiento
+    if((nacDesde||nacHasta)&&!c.nacimiento) return false;
+    if(nacDesde&&c.nacimiento<nacDesde) return false; if(nacHasta&&c.nacimiento>nacHasta) return false;
     if(q){ const blob=[c.paciente,c.dni,c.patologia,...(c.keywords||[]),...c.visitas.map(v=>v.descripcion)].join(' ').toLowerCase(); if(!blob.includes(q)) return false }
     return true;
   }).sort((a,b)=>ultimaFecha(b).localeCompare(ultimaFecha(a)));
