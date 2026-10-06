@@ -20,7 +20,9 @@ Descargar el repositorio y abrir `dermacasos.html` con doble clic. La primera ve
 
 ## Documentación
 
+- [`docs/propuesta_trabajo_final.md`](docs/propuesta_trabajo_final.md) ([PDF](docs/propuesta_trabajo_final.pdf)) — propuesta de Trabajo Final para la Especialización en Inteligencia Artificial, que toma esta prueba de concepto como especificación de la interfaz objetivo.
 - [`docs/datasets.md`](docs/datasets.md) — relevamiento de datasets abiertos de imágenes dermatológicas, útiles para etapas posteriores del proyecto.
+- [`docs/figuras/`](docs/figuras) — figuras de la propuesta en formato draw.io editable (`.drawio.xml`) y SVG/PNG, generadas por `generar_figuras.py`.
 
 ## Notas
 
